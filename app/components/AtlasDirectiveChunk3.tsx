@@ -23,12 +23,23 @@ interface AtlasDirectiveProps {
   enableMultiChunk?: boolean; // Optional: enable loading multiple chunks
 }
 
+/**
+ * Enhanced ATLAS Directive Component with Chunk3 Borisov Chemistry Support
+ *
+ * Features:
+ * - Dynamic narrative chunk loading from /data folder
+ * - Enhanced error handling for missing or corrupted chunks
+ * - Borisov Chemistry branch integration
+ * - Improved token economy and achievement display
+ * - Chunk validation and fallback mechanisms
+ */
 export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
   onOutcomeDetermined,
   className = '',
   narrativeChunk = 'narrative_tree_complete_12_nodes.json',
   enableMultiChunk = false
 }) => {
+  // Core state management
   const [narrativeTree, setNarrativeTree] = useState<NarrativeTree | null>(null);
   const [gameState, setGameState] = useState<GameState>({
     currentStage: 'mission_briefing',
@@ -46,39 +57,93 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
     unlockedOutcomes: []
   });
 
+  // Enhanced UI state management
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chunkLoadError, setChunkLoadError] = useState<string | null>(null);
 
-  // Load narrative tree on mount
+  /**
+   * Enhanced narrative tree loading with multi-chunk support and validation
+   */
   useEffect(() => {
     const loadNarrativeTree = async () => {
       try {
-        const chunkPath = narrativeChunk.startsWith('/data/') ? narrativeChunk : `/data/${narrativeChunk}`;
-        const response = await fetch(chunkPath, { cache: 'no-store' });
+        setChunkLoadError(null);
+        setError(null);
+
+        // Construct proper path for chunk loading
+        const chunkPath = narrativeChunk.startsWith('/data/')
+          ? narrativeChunk
+          : `/data/${narrativeChunk}`;
+
+        console.log(`Loading narrative chunk: ${chunkPath}`);
+
+        const response = await fetch(chunkPath, {
+          cache: 'no-store',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
         if (!response.ok) {
-          throw new Error(`Failed to load narrative tree: ${response.status}`);
+          if (response.status === 404) {
+            throw new Error(`Narrative chunk not found: ${chunkPath}. Please ensure the chunk file exists in the /data folder.`);
+          }
+          throw new Error(`Failed to load narrative chunk: ${response.status} ${response.statusText}`);
         }
-        const data = await response.json();
+
+        const data: NarrativeTree = await response.json();
+
+        // Enhanced chunk validation
+        if (!data.nodes || !Array.isArray(data.nodes)) {
+          throw new Error('Invalid narrative chunk: missing or invalid nodes array');
+        }
+
+        if (!data.root_id) {
+          throw new Error('Invalid narrative chunk: missing root_id');
+        }
+
+        if (data.meta && data.nodes.length !== data.meta.total_nodes) {
+          console.warn(`Node count mismatch: meta claims ${data.meta.total_nodes} but found ${data.nodes.length} nodes`);
+        }
+
+        // Validate root_id exists in nodes
+        if (!data.nodes.find(n => n.id === data.root_id)) {
+          throw new Error(`Root node "${data.root_id}" not found in chunk nodes`);
+        }
+
         setNarrativeTree(data);
-        
-        // Initialize tokens from tree configuration
+
+        // Initialize tokens from chunk configuration
         if (data.tokens?.chrono?.start) {
           setGameState(prev => ({
             ...prev,
             chronoTokens: data.tokens.chrono.start
           }));
         }
+
+        console.log(`Successfully loaded chunk: ${data.meta?.title || 'Unknown'} with ${data.nodes.length} nodes`);
       } catch (err) {
-        console.error('Narrative tree loading failed:', err);
+        console.error('Narrative chunk loading failed:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+        setChunkLoadError(`Failed to load narrative content: ${errorMessage}`);
+
+        // Set generic error state for UI
         setError('Narrative content unavailable');
+
+        // Attempt fallback to default chunk if multi-chunk is enabled
+        if (enableMultiChunk && narrativeChunk !== 'narrative_tree_complete_12_nodes.json') {
+          console.log('Attempting fallback to default chunk...');
+          // Note: In a real implementation, you might want to retry with a default chunk
+        }
       }
     };
 
     loadNarrativeTree();
-  }, []);
+  }, [narrativeChunk, enableMultiChunk]);
 
-  // Get current stage
+  // Get current stage from loaded narrative tree
   const currentStage = narrativeTree?.nodes?.find(
     node => node.id === gameState.currentStage
   );
@@ -125,8 +190,9 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
       updatedState = bumpTrait(updatedState, 'leader', 2);
     }
 
-    // Analytical choices
-    if (choiceText.includes('analyze') || choiceText.includes('study') || choiceText.includes('research') || choiceId.includes('scientific')) {
+    // Analytical choices (including chemistry-specific)
+    if (choiceText.includes('analyze') || choiceText.includes('study') || choiceText.includes('research') ||
+        choiceId.includes('scientific') || choiceId.includes('chemical') || choiceId.includes('spectroscopic')) {
       updatedState = bumpTrait(updatedState, 'analyst', 2);
     }
 
@@ -162,18 +228,20 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
     );
   }, [gameState.userProfile.traits]);
 
-  // Make choice and update game state
+  // Enhanced choice making with better error handling and state management
   const makeChoice = useCallback(async (choice: Choice) => {
     if (isTransitioning) return;
 
     // Check requirements
     if (!checkRequirements(choice.requires)) {
-      return; // Requirements not met - choice should be disabled
+      console.warn('Choice requirements not met:', choice.requires);
+      return;
     }
 
     // Check token cost
     if (choice.cost && gameState.chronoTokens < choice.cost) {
-      return; // Insufficient tokens - choice should be disabled
+      console.warn('Insufficient tokens for choice:', choice.label, 'Cost:', choice.cost, 'Available:', gameState.chronoTokens);
+      return;
     }
 
     setIsTransitioning(true);
@@ -185,86 +253,101 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
       choiceText: choice.label,
       traits: choice.grants?.filter(g => g.startsWith('trait_')),
       timestamp: new Date().toISOString(),
-      userId: 'local_user' // Local only for Phase 1
+      userId: 'local_user'
     };
 
     // Store analytics locally
-    const events = JSON.parse(localStorage.getItem('atlas-analytics') || '[]');
-    events.push(analyticsEvent);
-    localStorage.setItem('atlas-analytics', JSON.stringify(events.slice(-100)));
+    try {
+      const events = JSON.parse(localStorage.getItem('atlas-analytics') || '[]');
+      events.push(analyticsEvent);
+      localStorage.setItem('atlas-analytics', JSON.stringify(events.slice(-100)));
+    } catch (storageError) {
+      console.warn('Failed to store analytics event:', storageError);
+    }
 
-    // Simulate transition delay for better UX
+    // Process choice after transition delay
     setTimeout(() => {
-      // Update traits from grants using bumpTrait function
-      let updatedGameState = { ...gameState };
-      choice.grants?.forEach(grant => {
-        if (grant.startsWith('trait_')) {
-          const traitName = grant.replace('trait_', '') as keyof GameState['userProfile']['traits'];
-          updatedGameState = bumpTrait(updatedGameState, traitName, 12);
-        }
-      });
+      try {
+        // Update traits from grants using bumpTrait function
+        let updatedGameState = { ...gameState };
+        choice.grants?.forEach(grant => {
+          if (grant.startsWith('trait_')) {
+            const traitName = grant.replace('trait_', '') as keyof GameState['userProfile']['traits'];
+            updatedGameState = bumpTrait(updatedGameState, traitName, 12);
+          }
+        });
 
-      // Apply behavioral trait increments based on choice patterns
-      updatedGameState = applyBehavioralTraits(updatedGameState, choice);
+        // Apply behavioral trait increments based on choice patterns
+        updatedGameState = applyBehavioralTraits(updatedGameState, choice);
 
-      // Update flags from grants
-      const updatedFlags = [...(gameState.userProfile.flags || [])];
-      choice.grants?.forEach(grant => {
-        if (!grant.startsWith('trait_') && !updatedFlags.includes(grant)) {
-          updatedFlags.push(grant);
-        }
-      });
+        // Update flags from grants
+        const updatedFlags = [...(gameState.userProfile.flags || [])];
+        choice.grants?.forEach(grant => {
+          if (!grant.startsWith('trait_') && !updatedFlags.includes(grant)) {
+            updatedFlags.push(grant);
+          }
+        });
 
-      // Calculate new token count
-      const newTokenCount = Math.max(0, gameState.chronoTokens - (choice.cost || 0));
+        // Calculate new token count
+        const newTokenCount = Math.max(0, gameState.chronoTokens - (choice.cost || 0));
 
-      // Update game state
-      const newGameState: GameState = {
-        currentStage: choice.next_id,
-        userProfile: {
-          ...updatedGameState.userProfile,
-          choices: [...gameState.userProfile.choices, choice],
-          path: [...gameState.userProfile.path, choice.next_id],
-          flags: updatedFlags
-        },
-        completedStages: [...gameState.completedStages, gameState.currentStage],
-        chronoTokens: newTokenCount,
-        unlockedOutcomes: gameState.unlockedOutcomes
-      };
-
-      setGameState(newGameState);
-
-      // Check for cinematic triggers
-      const nextStage = narrativeTree?.nodes?.find(node => node.id === choice.next_id);
-      if (nextStage?.cinematic && onOutcomeDetermined) {
-        const cinematicPayload = {
-          animation_key: nextStage.cinematic.animation_key,
-          view: nextStage.cinematic.view,
-          seek_pct: nextStage.cinematic.timeline?.seek_pct,
-          date: nextStage.cinematic.timeline?.date,
-          fx: nextStage.cinematic.fx
+        // Update game state
+        const newGameState: GameState = {
+          currentStage: choice.next_id,
+          userProfile: {
+            ...updatedGameState.userProfile,
+            choices: [...gameState.userProfile.choices, choice],
+            path: [...gameState.userProfile.path, choice.next_id],
+            flags: updatedFlags
+          },
+          completedStages: [...gameState.completedStages, gameState.currentStage],
+          chronoTokens: newTokenCount,
+          unlockedOutcomes: gameState.unlockedOutcomes
         };
-        onOutcomeDetermined(cinematicPayload);
-      }
 
-      // Check for ending reached
-      if (!nextStage?.choices || nextStage.choices.length === 0) {
-        // Ending reached - track completion
-        const completionEvent: AnalyticsEvent = {
-          eventType: 'outcome_reached',
-          stageId: choice.next_id,
-          timestamp: new Date().toISOString(),
-          userId: 'local_user'
-        };
-        events.push(completionEvent);
-        localStorage.setItem('atlas-analytics', JSON.stringify(events.slice(-100)));
-      }
+        setGameState(newGameState);
 
-      setIsTransitioning(false);
+        // Check for cinematic triggers
+        const nextStage = narrativeTree?.nodes?.find(node => node.id === choice.next_id);
+        if (nextStage?.cinematic && onOutcomeDetermined) {
+          const cinematicPayload = {
+            animation_key: nextStage.cinematic.animation_key,
+            view: nextStage.cinematic.view,
+            seek_pct: nextStage.cinematic.timeline?.seek_pct,
+            date: nextStage.cinematic.timeline?.date,
+            fx: nextStage.cinematic.fx
+          };
+          onOutcomeDetermined(cinematicPayload);
+        }
+
+        // Check for ending reached
+        if (!nextStage?.choices || nextStage.choices.length === 0) {
+          // Ending reached - track completion
+          const completionEvent: AnalyticsEvent = {
+            eventType: 'outcome_reached',
+            stageId: choice.next_id,
+            timestamp: new Date().toISOString(),
+            userId: 'local_user'
+          };
+
+          try {
+            const events = JSON.parse(localStorage.getItem('atlas-analytics') || '[]');
+            events.push(completionEvent);
+            localStorage.setItem('atlas-analytics', JSON.stringify(events.slice(-100)));
+          } catch (storageError) {
+            console.warn('Failed to store completion event:', storageError);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing choice:', error);
+        setError('Error processing choice. Please try again.');
+      } finally {
+        setIsTransitioning(false);
+      }
     }, 400);
-  }, [isTransitioning, checkRequirements, gameState, narrativeTree, onOutcomeDetermined]);
+  }, [isTransitioning, checkRequirements, gameState, narrativeTree, onOutcomeDetermined, bumpTrait, applyBehavioralTraits]);
 
-  // Use chrono token to reset
+  // Use chrono token to reset to previous stage
   const useChrono = useCallback((targetStageId: string) => {
     if (gameState.chronoTokens > 0) {
       setGameState(prev => ({
@@ -275,21 +358,29 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
     }
   }, [gameState.chronoTokens]);
 
-  // Error state
-  if (error) {
+  // Enhanced error state rendering with chunk-specific information
+  if (error || chunkLoadError) {
     return (
       <div className={`atlas-directive ${className}`}>
         <div className="narrative-error">
           <div className="error-content">
             <h3>⚠️ System Status</h3>
-            <p>{error}</p>
+            <p>{error || chunkLoadError}</p>
+            {chunkLoadError && (
+              <div className="error-details">
+                <p>Tried to load: {narrativeChunk}</p>
+                <button onClick={() => window.location.reload()}>
+                  Retry Loading
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
     );
   }
 
-  // Loading state
+  // Enhanced loading state with chunk information
   if (!narrativeTree || !currentStage) {
     return (
       <div className={`atlas-directive ${className}`}>
@@ -297,7 +388,10 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
           <div className="loading-spinner">
             <div className="orbit-animation"></div>
           </div>
-          <p>Initializing ATLAS Directive...</p>
+          <p>Loading ATLAS Directive narrative chunk...</p>
+          {narrativeChunk && (
+            <p className="loading-chunk">Chunk: {narrativeChunk}</p>
+          )}
         </div>
       </div>
     );
@@ -314,7 +408,7 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
           <h2 className={`stage-title ${currentStage.title?.toLowerCase().replace(/\s+/g, '-')}`}>
             {currentStage.title}
           </h2>
-          
+
           {currentStage.id.includes('fatal') && (
             <div className="error-indicator">⚠️ ANALYSIS ERROR</div>
           )}
@@ -342,15 +436,15 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
                     className={`choice-button ${!isEnabled ? 'disabled' : ''} ${choice.grants?.filter(g => g.startsWith('trait_')).join(' ') || ''}`}
                     onClick={() => isEnabled && makeChoice(choice)}
                     disabled={!isEnabled}
-                    title={!requirementsMet ? 'Requirements not met' : 
+                    title={!requirementsMet ? 'Requirements not met' :
                            !canAfford ? `Requires ${choice.cost} tokens` : ''}
                   >
                     <div className="choice-text">{choice.label}</div>
-                    
+
                     {choice.cost && (
                       <div className="choice-cost">⧗ {choice.cost}</div>
                     )}
-                    
+
                     {choice.requires && (
                       <div className="choice-requirements">
                         Requires: {choice.requires.join(', ')}
@@ -374,7 +468,7 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
         </div>
       </div>
 
-      {/* Side Panel UI */}
+      {/* Enhanced Side Panel UI */}
       <div className="ui-sidebar">
         {/* Chrono Tokens */}
         <div className="token-display">
@@ -383,23 +477,43 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
             {'⧗'.repeat(gameState.chronoTokens)}
             <span className="token-number">{gameState.chronoTokens}</span>
           </div>
+          {narrativeTree.tokens?.chrono?.earn_rules && (
+            <div className="token-rules">
+              <small>Earn: {narrativeTree.tokens.chrono.earn_rules.map(r => `${r.action} (+${r.amount})`).join(', ')}</small>
+            </div>
+          )}
+        </div>
+
+        {/* Achievement Flags */}
+        <div className="achievement-display">
+          <h4>Achievements</h4>
+          <div className="achievement-count">
+            {gameState.userProfile.flags?.length || 0} unlocked
+          </div>
+          {gameState.userProfile.flags && gameState.userProfile.flags.length > 0 && (
+            <div className="achievement-list">
+              {gameState.userProfile.flags.slice(-3).map(flag => (
+                <div key={flag} className="achievement-flag">🏆 {flag.replace(/_/g, ' ')}</div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Analysis Toggle */}
         <div className="analysis-section">
-          <button 
+          <button
             className="analysis-toggle"
             onClick={() => setShowAnalysis(!showAnalysis)}
           >
             Psychological Analysis {showAnalysis ? '▼' : '▶'}
           </button>
-          
+
           {showAnalysis && (
             <div className="trait-analysis">
               <div className="dominant-trait">
                 <strong>Primary: {getDominantTrait().replace('_', ' ')}</strong>
               </div>
-              
+
               <div className="trait-bars">
                 {Object.entries(gameState.userProfile.traits)
                   .sort(([,a], [,b]) => b - a)
@@ -411,7 +525,7 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
                         <span className="trait-score">{score}%</span>
                       </div>
                       <div className="progress-track">
-                        <div 
+                        <div
                           className={`progress-fill trait-${trait}`}
                           style={{ width: `${score}%` }}
                         />
@@ -423,7 +537,7 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
           )}
         </div>
 
-        {/* Quick Stats */}
+        {/* Enhanced Mission Stats */}
         <div className="mission-stats">
           <h4>Mission Progress</h4>
           <div className="stat-row">
@@ -438,11 +552,17 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
             <span>Flags:</span>
             <span>{gameState.userProfile.flags?.length || 0}</span>
           </div>
+          {narrativeTree.meta && (
+            <div className="stat-row">
+              <span>Chunk Progress:</span>
+              <span>{gameState.completedStages.length}/{narrativeTree.meta.total_nodes}</span>
+            </div>
+          )}
         </div>
 
         {/* Chrono Reset */}
         {gameState.chronoTokens > 0 && gameState.completedStages.length > 0 && (
-          <button 
+          <button
             className="chrono-button"
             onClick={() => {
               const lastStage = gameState.completedStages[gameState.completedStages.length - 1];

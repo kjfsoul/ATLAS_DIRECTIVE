@@ -1,6 +1,4 @@
 /* eslint-disable */
-#!/usr/bin/env node
-
 import fs from 'fs';
 import path from 'path';
 // NEW: robust dirname for ESM

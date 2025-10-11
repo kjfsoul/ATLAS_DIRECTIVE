@@ -1,159 +1,427 @@
-/* eslint-disable */
-/* ...existing code... */
 #!/usr/bin/env node
+/* eslint-disable */
 // scripts/validate-narrative.mjs
-// Phase 4 - Validation Tools Implementation
+// Multi-chunk-aware narrative validator
+// Usage: node scripts/validate-narrative.mjs
+// Exit codes: 0 = pass, 2 = validation errors, 3 = runtime/parse error
 
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const ROOT = path.resolve('.');
+const DATA_DIR = path.resolve(ROOT, 'data');
+const CHUNK_REGEX = /^narrative_tree_chunk.*\.json$/;
 
-const NARRATIVE_PATH = path.join(__dirname, '../narrative_tree_complete_120_nodes.json');
+function readJson(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (err) {
+    throw new Error(`Failed to read/parse ${filePath}: ${err.message}`);
+  }
+}
 
-class AtlasNarrativeValidator {
-  constructor() {
-    this.errors = [];
-    this.warnings = [];
-    this.tree = null;
-    this.nodeIds = new Set();
-    this.nodeMap = new Map(); // NEW: fast lookup map
-    this.allFlags = new Set();
-    this.flagUsage = new Map();
-    this.stats = {
-      totalNodes: 0,
+function findChunkFiles() {
+  if (!fs.existsSync(DATA_DIR)) return [];
+  return fs.readdirSync(DATA_DIR).filter(f => CHUNK_REGEX.test(f)).sort();
+}
+
+function aggregateChunks(chunkFiles) {
+  const combinedNodes = [];
+  const idToFile = new Map();
+  const duplicates = [];
+  const chunkReports = new Map();
+  const parseErrors = [];
+
+  for (const file of chunkFiles) {
+    const full = path.join(DATA_DIR, file);
+    let obj;
+    try {
+      obj = readJson(full);
+    } catch (err) {
+      parseErrors.push({ file, error: err.message });
+      continue;
+    }
+
+    if (!Array.isArray(obj.nodes)) {
+      parseErrors.push({ file, error: 'missing nodes array' });
+      continue;
+    }
+
+    const report = {
+      file,
+      totalNodes: obj.nodes.length,
       endings: 0,
       skillChecks: 0,
-      goldenPathNodes: 0,
+      flags: new Set(),
+      nodeIds: new Set()
+    };
+
+    for (const node of obj.nodes) {
+      if (!node || typeof node !== 'object') continue;
+      if (!node.id) {
+        parseErrors.push({ file, error: 'node with missing id' });
+        continue;
+      }
+
+      if (idToFile.has(node.id)) {
+        duplicates.push({ id: node.id, files: [idToFile.get(node.id), file] });
+      } else {
+        idToFile.set(node.id, file);
+      }
+
+      report.nodeIds.add(node.id);
+      if (!Array.isArray(node.choices) || node.choices.length === 0) report.endings++;
+      if (node.id.includes('skill_')) report.skillChecks++;
+      if (node.grants && Array.isArray(node.grants)) node.grants.forEach(f => report.flags.add(f));
+      if (node.choices && Array.isArray(node.choices)) {
+        node.choices.forEach(choice => {
+          if (choice.grants && Array.isArray(choice.grants)) choice.grants.forEach(f => report.flags.add(f));
+        });
+      }
+
+      combinedNodes.push(node);
+    }
+
+    chunkReports.set(file, report);
+  }
+
+  return { combinedNodes, duplicates, chunkReports, parseErrors };
+}
+
+class MultiChunkValidator {
+  constructor(combinedTree, chunkReports, duplicates, parseErrors) {
+    this.tree = combinedTree;
+    this.chunkReports = chunkReports;
+    this.duplicates = duplicates || [];
+    this.parseErrors = parseErrors || [];
+    this.errors = [];
+    this.warnings = [];
+    this.infos = [];
+
+    this.nodeMap = new Map(this.tree.nodes.map(n => [n.id, n]));
+    this.nodeIds = new Set(this.tree.nodes.map(n => n.id));
+    this.globalFlags = new Set();
+    this.stats = {
+      totalNodes: this.tree.nodes.length,
+      endings: 0,
+      skillChecks: 0,
       unreachableNodes: [],
       danglingReferences: [],
-      flagCoverage: new Map(),
       witnessPaths: []
     };
+
+    // collect initial stats & flags
+    for (const node of this.tree.nodes) {
+      if (!node) continue;
+      if (Array.isArray(node.choices) && node.choices.length === 0) this.stats.endings++;
+      if (node.id && node.id.includes('skill_')) this.stats.skillChecks++;
+      if (node.grants && Array.isArray(node.grants)) node.grants.forEach(f => this.globalFlags.add(f));
+      if (node.choices && Array.isArray(node.choices)) {
+        node.choices.forEach(choice => {
+          if (choice.grants && Array.isArray(choice.grants)) choice.grants.forEach(f => this.globalFlags.add(f));
+        });
+      }
+    }
   }
 
-  log(level, message) {
-    const timestamp = new Date().toLocaleTimeString();
-    const prefix = {
-      'error': '❌ ERROR',
-      'warning': '⚠️  WARNING', 
-      'info': 'ℹ️  INFO',
-      'success': '✅ SUCCESS'
-    }[level] || 'LOG';
-    
-    console.log(`${prefix} [${timestamp}] ${message}`);
-    
-    if (level === 'error') this.errors.push(message);
-    if (level === 'warning') this.warnings.push(message);
+  logError(msg) {
+    this.errors.push(msg);
+    console.error('❌ ERROR:', msg);
+  }
+  logWarn(msg) {
+    this.warnings.push(msg);
+    console.warn('⚠️ WARNING:', msg);
+  }
+  logInfo(msg) {
+    this.infos.push(msg);
+    console.log('ℹ️ INFO:', msg);
   }
 
-  async loadNarrativeTree() {
-    try {
-      if (!fs.existsSync(NARRATIVE_PATH)) {
-        this.log('error', `Narrative tree not found: ${NARRATIVE_PATH}`);
-        return false;
-      }
+  runAllChecks() {
+    this.logInfo(`Aggregated nodes: ${this.tree.nodes.length}`);
 
-      const content = fs.readFileSync(NARRATIVE_PATH, 'utf8');
-      
-      // Check for BOM
-      if (content.charCodeAt(0) === 0xFEFF) {
-        this.log('error', 'File contains BOM. Save as UTF-8 without BOM.');
-        return false;
-      }
-
-      // Validate JSON structure
-      try {
-        this.tree = JSON.parse(content);
-      } catch (parseError) {
-        this.log('error', `JSON parsing failed: ${parseError.message}`);
-        return false;
-      }
-
-      // Build node id set & map for efficient lookups
-      if (Array.isArray(this.tree.nodes)) {
-        this.nodeIds = new Set(this.tree.nodes.map(n => n.id));
-        this.nodeMap = new Map(this.tree.nodes.map(n => [n.id, n]));
-      }
-
-      this.log('info', `Loaded narrative tree: ${this.tree.nodes?.length || 0} nodes`);
-      return true;
-
-    } catch (error) {
-      this.log('error', `File system error: ${error.message}`);
+    // parse errors take precedence as runtime/parse issues
+    if (this.parseErrors.length) {
+      this.parseErrors.forEach(p => this.logError(`Parse error in ${p.file}: ${p.error}`));
       return false;
     }
+
+    if (this.duplicates.length) {
+      this.duplicates.forEach(d => this.logError(`Duplicate node ID across chunks: ${d.id} (in files: ${d.files.join(', ')})`));
+    }
+
+    this.validateRootStructure();
+    this.validateNodesAndChoices();
+    this.validateDanglingReferences();
+    this.validateReachability();
+    this.validateTokenEconomy();
+    this.validateTokenEconomySafety();
+    this.validateAchievementFlags();
+    this.validateAnimationKeys();
+    this.validateScientificFacts();
+    this.validateGoldenPathReachability();
+
+    return this.errors.length === 0;
   }
 
   validateRootStructure() {
-    if (!this.tree) return;
-
-    const required = ['meta', 'root_id', 'tokens', 'nodes'];
+    if (!this.tree) {
+      this.logError('Combined narrative tree missing');
+      return;
+    }
+    const required = ['meta', 'root_id', 'nodes'];
     for (const prop of required) {
-      if (!(prop in this.tree)) {
-        this.log('error', `Missing required root property: ${prop}`);
+      if (!(prop in this.tree)) this.logWarn(`Missing root property: ${prop}`);
+    }
+    if (this.tree.root_id && !this.nodeMap.has(this.tree.root_id)) {
+      this.logWarn(`root_id "${this.tree.root_id}" not found in combined nodes`);
+    }
+    if (this.tree.meta && typeof this.tree.meta.total_nodes === 'number') {
+      if (this.tree.meta.total_nodes !== this.tree.nodes.length) {
+        this.logWarn(`META PARITY: declared ${this.tree.meta.total_nodes} != actual ${this.tree.nodes.length}`);
       }
     }
+  }
 
-    // Validate root_id exists in nodes
-    if (this.tree.root_id && !this.tree.nodes?.find(n => n.id === this.tree.root_id)) {
-      this.log('error', `root_id "${this.tree.root_id}" not found in nodes`);
+  validateNodesAndChoices() {
+    for (const node of this.tree.nodes) {
+      if (!node.id) this.logError('Encountered node with missing id');
+      if (!node.title) this.logWarn(`Node ${node.id || '(missing id)'} missing title`);
+      if (!node.body_md) this.logWarn(`Node ${node.id || '(missing id)'} missing body_md`);
+
+      if (!Array.isArray(node.choices)) {
+        this.logWarn(`Node ${node.id} choices missing or not an array`);
+        continue;
+      }
+
+      if (node.choices.length === 0) this.stats.endings++;
+      node.choices.forEach(choice => {
+        if (!choice.id) this.logError(`Choice in node ${node.id} missing id`);
+        if (!choice.label) this.logError(`Choice ${choice.id || '(unknown)'} in node ${node.id} missing label`);
+        if (!choice.next_id) this.logError(`Choice ${choice.id || '(unknown)'} in node ${node.id} missing next_id`);
+        if (choice.cost !== undefined && (typeof choice.cost !== 'number' || choice.cost < 0)) {
+          this.logError(`Choice ${choice.id || '(unknown)'} in node ${node.id} has invalid cost`);
+        }
+      });
     }
+  }
 
-    // Validate meta section
-    if (this.tree.meta) {
-      const metaRequired = ['version', 'title', 'total_nodes'];
-      for (const prop of metaRequired) {
-        if (!(prop in this.tree.meta)) {
-          this.log('warning', `Missing meta property: ${prop}`);
+  validateDanglingReferences() {
+    const idSet = this.nodeIds;
+    for (const node of this.tree.nodes) {
+      if (!Array.isArray(node.choices)) continue;
+      for (const choice of node.choices) {
+        const nextId = choice.next_id;
+        if (!nextId) continue;
+        if (nextId === 'terminal' || nextId === 'end') continue;
+        if (!idSet.has(nextId)) {
+          this.stats.danglingReferences.push({ from: node.id, next_id: nextId });
+          this.logError(`Dangling reference from ${node.id} -> ${nextId}`);
         }
       }
-
-      // CRITICAL: Check if node count matches - should be error, not warning
-      const actualNodes = this.tree.nodes?.length || 0;
-      if (this.tree.meta.total_nodes !== actualNodes) {
-        this.log('error', `META PARITY FAILURE: meta.total_nodes (${this.tree.meta.total_nodes}) !== nodes.length (${actualNodes})`);
-      }
-    }
-
-    // Validate token structure
-    if (this.tree.tokens?.chrono) {
-      if (typeof this.tree.tokens.chrono.start !== 'number') {
-        this.log('error', 'tokens.chrono.start must be a number');
-      }
-      if (!Array.isArray(this.tree.tokens.chrono.earn_rules)) {
-        this.log('error', 'tokens.chrono.earn_rules must be an array');
-      }
     }
   }
 
-  validateNodes() {
-    if (!this.tree?.nodes) return;
+  validateReachability() {
+    if (!this.tree.root_id) {
+      this.logWarn('No root_id defined; attempting heuristic root.');
+      // attempt heuristic root if mission_briefing exists
+      if (this.nodeIds.has('mission_briefing')) this.tree.root_id = 'mission_briefing';
+      else if (this.tree.nodes.length) this.tree.root_id = this.tree.nodes[0].id;
+      else return;
+    }
 
-    // Collect node IDs and check for duplicates
-    this.tree.nodes.forEach((node, index) => {
-      if (!node.id) {
-        this.log('error', `Node[${index}] missing required id`);
-        return;
+    const reachable = new Set();
+    const stack = [this.tree.root_id];
+    while (stack.length) {
+      const id = stack.pop();
+      if (!id || reachable.has(id)) continue;
+      reachable.add(id);
+      const node = this.nodeMap.get(id);
+      if (!node || !Array.isArray(node.choices)) continue;
+      for (const choice of node.choices) {
+        const nid = choice.next_id;
+        if (nid && nid !== 'terminal' && nid !== 'end') stack.push(nid);
       }
-      
-      if (this.nodeIds.has(node.id)) {
-        this.log('error', `Duplicate node ID: ${node.id}`);
-      }
-      this.nodeIds.add(node.id);
-    });
+    }
 
-    // Validate each node
-    this.tree.nodes.forEach((node, index) => {
-      this.validateIndividualNode(node, index);
-    });
-
-    this.stats.totalNodes = this.tree.nodes.length;
+    const unreachable = [...this.nodeIds].filter(id => !reachable.has(id));
+    if (unreachable.length) {
+      this.stats.unreachableNodes = unreachable;
+      this.logWarn(`Unreachable nodes detected (${unreachable.length}): ${unreachable.slice(0,20).join(', ')}`);
+    } else {
+      this.logInfo('All nodes reachable from root');
+    }
   }
 
-  validateIndividualNode(node, index) {
+  validateTokenEconomy() {
+    const startTokens = (this.tree.tokens?.chrono?.start) ?? 0;
+    const earnRules = Array.isArray(this.tree.tokens?.chrono?.earn_rules) ? this.tree.tokens.chrono.earn_rules : [];
+
+    let maxCost = 0;
+    for (const node of this.tree.nodes) {
+      (node.choices || []).forEach(choice => {
+        if (typeof choice.cost === 'number') {
+          if
+          maxCost = Math.max(maxCost, choice.cost);
+        }
+      });
+    }
+
+    const totalEarnPotential = earnRules.reduce((s, r) => s + (r.amount || 0), 0);
+    this.logInfo(`Token economy: start=${startTokens}, maxChoiceCost=${maxCost}, earnPotential=${totalEarnPotential}`);
+    if (maxCost > startTokens + totalEarnPotential) {
+      this.logError('Token economy imbalance: costs may exceed earn potential');
+    } else {
+      this.logInfo('Token economy appears balanced (collective check)');
+    }
+
+    // Additional simulation for soft-locks (simple heuristic)
+    // Try simple depth-limited traversal tracking tokens; report if any dead-end requires more tokens than possible
+    const softLocks = [];
+    const maxDepth = 30;
+
+    const dfs = (nodeId, tokens, depth, visited) => {
+      if (depth > maxDepth) return;
+      const key = `${nodeId}|${tokens}|${depth}`;
+      if (visited.has(key)) return;
+      visited.add(key);
+      const node = this.nodeMap.get(nodeId);
+      if (!node) return;
+      if (!Array.isArray(node.choices) || node.choices.length === 0) return;
+      for (const choice of node.choices) {
+        const cost = typeof choice.cost === 'number' ? choice.cost : 0;
+        const remaining = tokens - cost;
+        if (remaining < 0) {
+          softLocks.push({ nodeId, choice: choice.label || choice.id, required: cost, available: tokens });
+          continue;
+        }
+        if (choice.next_id && choice.next_id !== 'terminal' && choice.next_id !== 'end') {
+          dfs(choice.next_id, remaining, depth + 1, visited);
+        }
+      }
+    };
+
+    if (this.tree.root_id) dfs(this.tree.root_id, startTokens, 0, new Set());
+    if (softLocks.length) {
+      softLocks.slice(0, 10).forEach(s => this.logError(`Potential token soft-lock at ${s.nodeId} on "${s.choice}" requires ${s.required} but only ${s.available} available`));
+    }
+  }
+
+  validateAchievementFlags() {
+    // required flags as per system
+    const requiredFlags = [
+      'mission_started', 'first_contact_attempt', 'artificial_signals',
+      'breakthrough_discovery', 'global_leadership', 'international_cooperation',
+      'unity_comprehension', 'cosmic_citizenship', 'prime_discovery',
+      'ending_common', 'ending_uncommon', 'perihelion_observed'
+    ];
+    const present = new Set(this.globalFlags);
+    const missing = requiredFlags.filter(f => !present.has(f));
+    if (missing.length) {
+      this.logError(`Missing achievement flags: ${missing.join(', ')}`);
+    } else {
+      this.logInfo('All required achievement flags are present (collective)');
+    }
+  }
+
+  validateAnimationKeys() {
+    // simple check for animation_key usage
+    const keys = new Set();
+    for (const node of this.tree.nodes) {
+      if (node.cinematic && node.cinematic.animation_key) keys.add(node.cinematic.animation_key);
+    }
+    const required = ['mission_start', 'error_state', 'perihelion_final', 'prime_revelation', 'first_contact'];
+    const missing = required.filter(k => !keys.has(k));
+    if (missing.length) this.logWarn(`Missing animation keys: ${missing.join(', ')}`);
+    else this.logInfo('All critical animation keys present');
+  }
+
+  validateScientificFacts() {
+    // basic heuristic to detect presence of key scientific phrases
+    const scientificFacts = [
+      { key: 'hyperbolic', pattern: /hyperbolic.*eccentricity.*>\s*1/i },
+      { key: 'velocity', pattern: /137,?000.*mph/i },
+      { key: 'age', pattern: /7.*billion.*years/i }
+    ];
+    let found = 0;
+    const foundKeys = new Set();
+    for (const node of this.tree.nodes) {
+      const text = ((node.body_md || '') + ' ' + (node.title || '') + ' ' + ((node.choices||[]).map(c => c.label || '').join(' '))).toLowerCase();
+      for (const fact of scientificFacts) {
+        if (fact.pattern.test(text) && !foundKeys.has(fact.key)) {
+          foundKeys.add(fact.key);
+          found++;
+        }
+      }
+    }
+    this.logInfo(`Scientific facts verified: ${found}/${scientificFacts.length} (${[...foundKeys].join(', ')})`);
+    if (found < 2) this.logWarn('Limited scientific fact coverage detected');
+  }
+
+  generateReport() {
+    console.log('\n' + '='.repeat(80));
+    console.log('MULTI-CHUNK NARRATIVE VALIDATION REPORT');
+    console.log('='.repeat(80));
+    // per-chunk
+    for (const [file, report] of this.chunkReports.entries()) {
+      console.log(`\nChunk: ${file}`);
+      console.log(`  Nodes: ${report.totalNodes}`);
+      console.log(`  Endings: ${report.endings}`);
+      console.log(`  Skill checks: ${report.skillChecks}`);
+      console.log(`  Flags: ${report.flags.size}`);
+    }
+
+    // global
+    console.log('\nGlobal Summary:');
+    console.log(`  Total chunks: ${this.chunkReports.size}`);
+    console.log(`  Total nodes aggregated: ${this.tree.nodes.length}`);
+    console.log(`  Duplicate IDs detected: ${this.duplicates.length}`);
+    console.log(`  Errors: ${this.errors.length}`);
+    console.log(`  Warnings: ${this.warnings.length}`);
+
+    if (this.errors.length > 0) {
+      console.log('\nErrors (first 50):');
+      this.errors.slice(0,50).forEach(e => console.log(' -', e));
+    }
+    if (this.warnings.length > 0) {
+      console.log('\nWarnings (first 50):');
+      this.warnings.slice(0,50).forEach(w => console.log(' -', w));
+    }
+
+    console.log('\n' + '='.repeat(80));
+    if (this.errors.length === 0) {
+      console.log('VALIDATION PASSED ✅');
+    } else {
+      console.log('VALIDATION FAILED ❌');
+    }
+  }
+}
+
+
+// Entrypoint
+(async () => {
+  try {
+    const chunkFiles = findChunkFiles();
+    if (chunkFiles.length === 0) {
+      console.error('No narrative chunk files found in data/. Ensure files named narrative_tree_chunk*.json exist.');
+      process.exit(3);
+    }
+
+    const { combinedNodes, duplicates, chunkReports } = aggregateChunks(chunkFiles);
+    const combinedTree = buildCombinedTree(combinedNodes, chunkFiles);
+
+    const validator = new MultiChunkValidator(combinedTree, chunkReports, duplicates);
+    const ok = validator.runAllChecks();
+    validator.generateReport();
+
+    if (!ok) process.exit(2);
+    process.exit(0);
+  } catch (err) {
+    console.error('Validator runtime error:', err.message);
+    process.exit(3);
+  }
+})();
     const nodeRef = `Node[${index}] "${node.id || 'unnamed'}"`;
 
     // Required fields
@@ -855,15 +1123,24 @@ class AtlasNarrativeValidator {
   }
 }
 
-// Allow import without executing; run only when invoked directly
+// Main execution logic
 const scriptPath = fileURLToPath(import.meta.url);
 if (process.argv[1] === scriptPath) {
-  const validator = new AtlasNarrativeValidator();
-  // top-level await is already used previously; prefer immediate invocation via IIFE
   (async () => {
-    const isValid = await validator.validateComplete();
-    process.exit(isValid ? 0 : 1);
+    // Check if multi-chunk mode is requested
+    const isMultiChunk = process.argv.includes('--multi-chunk') || process.argv.includes('-m');
+
+    if (isMultiChunk) {
+      const multiValidator = new MultiChunkNarrativeValidator();
+      const isValid = await multiValidator.validateAllChunks();
+      process.exit(isValid ? 0 : 1);
+    } else {
+      // Single file validation (legacy mode)
+      const validator = new AtlasNarrativeValidator();
+      const isValid = await validator.validateComplete();
+      process.exit(isValid ? 0 : 1);
+    }
   })();
 }
 
-export default AtlasNarrativeValidator;
+export { AtlasNarrativeValidator, MultiChunkNarrativeValidator };

@@ -4,7 +4,7 @@
     "updated_utc": "2025-10-11T02:25:00.000Z",
     "title": "The ATLAS Directive",
     "description": "Interactive narrative discovery platform for 3I/ATLAS interstellar object analysis",
-    "total_nodes": 12,
+    "total_nodes": 19,
     "endings": 6,
     "golden_path_nodes": 1,
     "skill_checks": 3,

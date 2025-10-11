@@ -1,0 +1,327 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "updated_utc": "2025-10-11T03:58:00.000Z",
+    "title": "The ATLAS Directive - Velocity, Age & Discovery Analysis",
+    "description": "Advanced kinematic, chronological, and discovery analysis for 3I/ATLAS interstellar visitor",
+    "total_nodes": 12,
+    "endings": 4,
+    "golden_path_nodes": 1,
+    "skill_checks": 4,
+    "branching_points": 3
+  },
+  "root_id": "velocity_age_entry",
+  "tokens": {
+    "chrono": {
+      "start": 3,
+      "earn_rules": [
+        {
+          "action": "complete_kinematic_analysis",
+          "amount": 2
+        },
+        {
+          "action": "master_age_determination",
+          "amount": 3
+        },
+        {
+          "action": "verify_discovery_data",
+          "amount": 2
+        },
+        {
+          "action": "achieve_kinematic_precision",
+          "amount": 4
+        }
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "velocity_age_entry",
+      "title": "Kinematic & Chronological Analysis Gateway",
+      "body_md": "**VELOCITY, AGE & DISCOVERY SPECIALIZATION**: Advanced analytical protocols engaged for 3I/ATLAS kinematic and chronological assessment.\n\n**BRANCHING FROM**: Main ATLAS Directive analysis stream\n**FOCUS**: Kinematic analysis, age determination, and discovery verification\n**SCIENTIFIC VALUE**: Understanding an object's motion through space and time provides crucial data for galactic dynamics and cosmology.\n\n**ENTRY REQUIREMENTS**: Basic interstellar visitor knowledge and trajectory analysis completion required.",
+      "choices": [
+        {
+          "id": "enter_velocity",
+          "label": "Initiate detailed velocity and kinematic analysis",
+          "next_id": "velocity_kinematic_skill",
+          "grants": [
+            "kinematic_analysis_started",
+            "velocity_focus"
+          ]
+        },
+        {
+          "id": "enter_age",
+          "label": "Begin chronological and age determination protocols",
+          "next_id": "age_determination_skill",
+          "grants": [
+            "kinematic_analysis_started",
+            "age_focus"
+          ]
+        },
+        {
+          "id": "enter_discovery",
+          "label": "Review discovery circumstances and telescope data",
+          "next_id": "discovery_verification_skill",
+          "grants": [
+            "kinematic_analysis_started",
+            "discovery_focus"
+          ]
+        }
+      ],
+      "cinematic": {
+        "animation_key": "kinematic_analysis",
+        "view": "default",
+        "timeline": {
+          "seek_pct": 0.3
+        }
+      }
+    },
+    {
+      "id": "velocity_kinematic_skill",
+      "title": "Velocity Analysis Challenge",
+      "body_md": "**SKILL CHECK: Kinematic Analysis**\n\n3I/ATLAS velocity relative to the Sun provides definitive evidence of its interstellar origin.\n\n**OBSERVATIONAL DATA**:\n- Radial velocity measurements from spectroscopic analysis\n- Proper motion tracking across multiple observation nights\n- Gravitational redshift calculations\n- Orbital mechanics integration\n\n**QUESTION**: What is 3I/ATLAS's measured velocity relative to the Sun?",
+      "choices": [
+        {
+          "id": "correct_137k",
+          "label": "~137,000 mph (hyperbolic escape velocity)",
+          "next_id": "velocity_confirmed",
+          "grants": [
+            "skill_kinematic_analysis",
+            "velocity_expertise"
+          ],
+          "rewards": {
+            "tokens": 2
+          }
+        },
+        {
+          "id": "incorrect_67k",
+          "label": "~67,000 mph (typical orbital velocity)",
+          "next_id": "velocity_error_retry",
+          "cost": 1
+        },
+        {
+          "id": "incorrect_25k",
+          "label": "~25,000 mph (solar escape velocity)",
+          "next_id": "velocity_error_retry",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "velocity_confirmed",
+      "title": "Velocity Analysis Validated",
+      "body_md": "**ACCURATE KINEMATIC ASSESSMENT**: 3I/ATLAS velocity of ~137,000 mph relative to the Sun confirms its interstellar origin.\n\n**SCIENTIFIC IMPLICATIONS**:\n- Hyperbolic trajectory: eccentricity > 1.0\n- Unbound orbit: Will escape solar system gravity\n- Galactic velocity: Consistent with thick disk population\n- Origin distance: Potentially traversed billions of light years\n\n**ASTROPHYSICAL SIGNIFICANCE**: This velocity profile provides crucial data for understanding galactic kinematics and interstellar visitor dynamics.",
+      "choices": [
+        {
+          "id": "proceed_age",
+          "label": "Analyze object age and formation era",
+          "next_id": "age_determination_skill"
+        },
+        {
+          "id": "proceed_discovery",
+          "label": "Review discovery circumstances",
+          "next_id": "discovery_verification_skill"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "velocity_error_retry",
+      "title": "Velocity Analysis Error - Review Required",
+      "body_md": "**INCORRECT VELOCITY ASSESSMENT**: Review kinematic analysis fundamentals.\n\n**EDUCATIONAL NOTE**: 3I/ATLAS's velocity of ~137,000 mph relative to the Sun is determined through a combination of radial velocity measurements, proper motion tracking, and gravitational redshift calculations. This velocity definitively establishes its hyperbolic trajectory.\n\n**RETRY**: Re-analyze the kinematic data with corrected velocity calculations.",
+      "choices": [
+        {
+          "id": "retry_velocity",
+          "label": "Retry velocity analysis",
+          "next_id": "velocity_kinematic_skill"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "age_determination_skill",
+      "title": "Age Determination Challenge",
+      "body_md": "**SKILL CHECK: Chronological Analysis**\n\nMultiple independent methods converge on 3I/ATLAS's formation timeline.\n\n**ANALYTICAL METHODS**:\n- Cosmic ray exposure dating (surface weathering)\n- Nucleosynthetic isotope ratios (formation era chemistry)\n- Galactic chemical evolution models (metallicity analysis)\n- Dynamical traceback analysis (orbital integration)\n\n**QUESTION**: What is 3I/ATLAS's estimated formation age?",
+      "choices": [
+        {
+          "id": "correct_ancient",
+          "label": "7+ billion years (pre-solar system formation)",
+          "next_id": "age_confirmed",
+          "grants": [
+            "skill_age_determination",
+            "age_expertise"
+          ],
+          "rewards": {
+            "tokens": 3
+          }
+        },
+        {
+          "id": "incorrect_solar",
+          "label": "4.6 billion years (contemporary with solar system)",
+          "next_id": "age_error_retry",
+          "cost": 1
+        },
+        {
+          "id": "incorrect_young",
+          "label": "1-2 billion years (recent formation)",
+          "next_id": "age_error_retry",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "age_confirmed",
+      "title": "Age Determination Validated",
+      "body_md": "**ACCURATE CHRONOLOGICAL ASSESSMENT**: 3I/ATLAS formed 7+ billion years ago, predating our solar system's formation.\n\n**SCIENTIFIC IMPLICATIONS**:\n- Formation era: Milky Way thick disk formation period\n- Metallicity: Consistent with Population II stars\n- Galactic evolution: Witness to early galactic chemical enrichment\n- Solar system context: Formed before our solar system's birth\n\n**COSMOLOGICAL SIGNIFICANCE**: This ancient origin provides a direct sample of the early universe's composition and formation processes.",
+      "choices": [
+        {
+          "id": "proceed_discovery",
+          "label": "Review discovery circumstances and telescope data",
+          "next_id": "discovery_verification_skill"
+        },
+        {
+          "id": "proceed_velocity",
+          "label": "Re-examine velocity data with age context",
+          "next_id": "velocity_kinematic_skill"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "age_error_retry",
+      "title": "Age Analysis Error - Review Required",
+      "body_md": "**INCORRECT AGE ASSESSMENT**: Review chronological analysis methodologies.\n\n**EDUCATIONAL NOTE**: 3I/ATLAS's age of 7+ billion years is determined through multiple independent methods including cosmic ray exposure dating, isotopic analysis, and galactic chemical evolution modeling. This places its formation before our solar system's birth.\n\n**RETRY**: Re-evaluate the age determination data with corrected chronological methods.",
+      "choices": [
+        {
+          "id": "retry_age",
+          "label": "Retry age determination",
+          "next_id": "age_determination_skill"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "discovery_verification_skill",
+      "title": "Discovery Verification Challenge",
+      "body_md": "**SKILL CHECK: Discovery History**\n\n3I/ATLAS discovery circumstances provide crucial context for understanding the object's observational history.\n\n**DISCOVERY DATA**:\n- Detection method: Automated telescope survey\n- Initial magnitude: Faint detection requiring confirmation\n- Coordinate verification: Astrometric precision required\n- Follow-up observations: Multiple telescope networks involved\n\n**QUESTION**: When and by which telescope system was 3I/ATLAS discovered?",
+      "choices": [
+        {
+          "id": "correct_discovery",
+          "label": "July 1, 2025 by ATLAS telescope system in Chile",
+          "next_id": "discovery_confirmed",
+          "grants": [
+            "skill_discovery_verification",
+            "discovery_expertise"
+          ],
+          "rewards": {
+            "tokens": 2
+          }
+        },
+        {
+          "id": "incorrect_hubble",
+          "label": "June 15, 2025 by Hubble Space Telescope",
+          "next_id": "discovery_error_retry",
+          "cost": 1
+        },
+        {
+          "id": "incorrect_jwst",
+          "label": "August 1, 2025 by James Webb Space Telescope",
+          "next_id": "discovery_error_retry",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "discovery_confirmed",
+      "title": "Discovery Verification Validated",
+      "body_md": "**ACCURATE DISCOVERY ASSESSMENT**: 3I/ATLAS was discovered on July 1, 2025 by the ATLAS (Asteroid Terrestrial-impact Last Alert System) telescope in Chile.\n\n**DISCOVERY CONTEXT**:\n- **Telescope**: ATLAS - dual 0.5m telescopes optimized for near-Earth object detection\n- **Location**: Haleakala Observatory, Maui, Hawaii (though commonly associated with Chile)\n- **Detection Method**: Automated survey scanning for moving objects\n- **Magnitude**: Initially detected as a fast-moving point source\n- **Confirmation**: Rapid follow-up by international telescope network\n\n**SCIENTIFIC SIGNIFICANCE**: This discovery demonstrates the effectiveness of automated survey systems for detecting faint, fast-moving interstellar objects.",
+      "choices": [
+        {
+          "id": "analyze_telescope",
+          "label": "Deep dive into ATLAS telescope capabilities",
+          "next_id": "ending_telescope_analysis"
+        },
+        {
+          "id": "analyze_impact",
+          "label": "Assess scientific impact of discovery",
+          "next_id": "ending_discovery_impact"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "discovery_error_retry",
+      "title": "Discovery Analysis Error - Review Required",
+      "body_md": "**INCORRECT DISCOVERY ASSESSMENT**: Review discovery data and telescope information.\n\n**EDUCATIONAL NOTE**: 3I/ATLAS was discovered on July 1, 2025 by the ATLAS telescope system, which consists of two 0.5-meter telescopes designed for automated detection of near-Earth objects and potentially hazardous asteroids.\n\n**RETRY**: Re-evaluate the discovery circumstances with accurate telescope and date information.",
+      "choices": [
+        {
+          "id": "retry_discovery",
+          "label": "Retry discovery verification",
+          "next_id": "discovery_verification_skill"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "ending_telescope_analysis",
+      "title": "Telescope System Analysis Complete",
+      "body_md": "**MISSION ACCOMPLISHED**: ATLAS telescope system capabilities fully analyzed.\n\n**KEY FINDINGS**:\n- **System Design**: Two 0.5m telescopes with wide-field cameras\n- **Detection Capability**: Automated survey covering large sky areas\n- **Interstellar Sensitivity**: Proven capability for faint, fast-moving objects\n- **Follow-up Network**: Integration with global telescope coordination\n\n**ACHIEVEMENT UNLOCKED**: Telescope Systems Specialist\n\n**NEXT STEPS**: ATLAS discoveries continue to enhance our understanding of small solar system objects and interstellar visitors.",
+      "choices": [],
+      "grants": [
+        "telescope_analysis_complete",
+        "telescope_specialist"
+      ]
+    },
+    {
+      "id": "ending_discovery_impact",
+      "title": "Discovery Impact Assessment Complete",
+      "body_md": "**MISSION ACCOMPLISHED**: Scientific impact of 3I/ATLAS discovery fully assessed.\n\n**KEY FINDINGS**:\n- **Survey Effectiveness**: Demonstrated success of automated detection systems\n- **Rapid Response**: International coordination enabled quick follow-up\n- **Interstellar Detection**: Third confirmed interstellar object discovery\n- **Scientific Value**: Enhanced understanding of galactic object distribution\n\n**ACHIEVEMENT UNLOCKED**: Discovery Impact Analyst\n\n**NEXT STEPS**: Discovery enhances search strategies for future interstellar visitors and near-Earth objects.",
+      "choices": [],
+      "grants": [
+        "discovery_impact_complete",
+        "impact_analyst"
+      ]
+    },
+    {
+      "id": "ending_velocity_success",
+      "title": "Kinematic Analysis Mastery Complete",
+      "body_md": "**MISSION ACCOMPLISHED**: Comprehensive kinematic analysis of 3I/ATLAS completed.\n\n**KEY FINDINGS**:\n- **Velocity Confirmed**: ~137,000 mph relative to Sun\n- **Trajectory Verified**: Hyperbolic orbit with eccentricity > 1.0\n- **Origin Established**: Interstellar space, Milky Way thick disk\n- **Dynamical Model**: Complete orbital mechanics solution\n\n**ACHIEVEMENT UNLOCKED**: Kinematic Analysis Master\n\n**NEXT STEPS**: Velocity data informs future interstellar object detection and tracking algorithms.",
+      "choices": [],
+      "grants": [
+        "kinematic_mastery_complete",
+        "kinematic_master"
+      ]
+    },
+    {
+      "id": "ending_age_success",
+      "title": "Chronological Analysis Complete",
+      "body_md": "**MISSION ACCOMPLISHED**: 3I/ATLAS chronological analysis successfully completed.\n\n**KEY FINDINGS**:\n- **Formation Age**: 7+ billion years (pre-solar system)\n- **Chemical Dating**: Consistent with Population II stars\n- **Galactic Context**: Thick disk formation era\n- **Cosmological Value**: Direct sample of early universe composition\n\n**ACHIEVEMENT UNLOCKED**: Chronological Analysis Expert\n\n**NEXT STEPS**: Age data provides crucial constraints for galactic chemical evolution models.",
+      "choices": [],
+      "grants": [
+        "chronological_analysis_complete",
+        "chronological_expert"
+      ]
+    }
+  ]
+}

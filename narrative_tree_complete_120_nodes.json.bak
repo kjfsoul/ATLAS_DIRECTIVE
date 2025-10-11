@@ -1,0 +1,312 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "updated_utc": "2025-10-11T04:22:00.000Z",
+    "title": "The ATLAS Directive",
+    "description": "Interactive narrative discovery platform for 3I/ATLAS interstellar object analysis",
+    "total_nodes": 25,
+    "endings": 8,
+    "golden_path_nodes": 3,
+    "skill_checks": 8,
+    "branching_points": 4
+  },
+  "root_id": "mission_briefing",
+  "tokens": {
+    "chrono": {
+      "start": 3,
+      "earn_rules": [
+        {
+          "action": "complete_skill_check",
+          "amount": 1
+        },
+        {
+          "action": "discover_new_path",
+          "amount": 2
+        },
+        {
+          "action": "reach_milestone",
+          "amount": 3
+        },
+        {
+          "action": "perfect_skill_sequence",
+          "amount": 5
+        }
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "mission_briefing",
+      "title": "ATLAS Directive - Mission Briefing",
+      "body_md": "**ATLAS DIRECTIVE - CLASSIFICATION: RESTRICTED**\n\n**DATE**: July 1, 2025\n**DISCOVERY**: ATLAS Telescope System, Chile\n\nYou are Analyst designation ALT-7, newly assigned to The ATLAS Directive. Object 3I/ATLAS represents humanity's third confirmed interstellar visitor.\n\n**OBJECTIVES**:\n- Analyze orbital mechanics and trajectory\n- Determine interstellar origin confirmation\n- Assess potential scientific significance\n- Recommend response protocols\n\n**INITIAL DATA**:\n- Velocity: ~137,000 mph relative to Sun\n- Estimated age: 7+ billion years\n- Nucleus diameter: 440m-5.6km\n- Origin: Milky Way thick disk\n\nYour analysis will determine humanity's scientific and strategic response to this celestial visitor.",
+      "choices": [
+        {
+          "id": "choice_trajectory",
+          "label": "Analyze orbital trajectory mechanics",
+          "next_id": "skill_trajectory_analysis",
+          "grants": [
+            "mission_started",
+            "trajectory_focus"
+          ]
+        },
+        {
+          "id": "choice_comparison",
+          "label": "Compare with previous interstellar visitors",
+          "next_id": "interstellar_comparison",
+          "grants": [
+            "mission_started",
+            "comparative_approach"
+          ]
+        }
+      ],
+      "cinematic": {
+        "animation_key": "mission_start",
+        "view": "default",
+        "timeline": {
+          "seek_pct": 0.1
+        }
+      }
+    },
+    {
+      "id": "skill_trajectory_analysis",
+      "title": "Orbital Mechanics Assessment",
+      "body_md": "**SKILL CHECK: Orbital Mechanics**\n\n3I/ATLAS follows which orbital path type, confirming its interstellar origin?\n\n**ANALYSIS**: The object's velocity of ~137,000 mph relative to the Sun indicates it is not gravitationally bound to our solar system.",
+      "choices": [
+        {
+          "id": "correct_hyperbolic",
+          "label": "Hyperbolic trajectory (eccentricity > 1.0)",
+          "next_id": "trajectory_confirmed",
+          "grants": [
+            "skill_orbital_mechanics",
+            "correct_trajectory"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_elliptical",
+          "label": "Elliptical orbit (bound trajectory)",
+          "next_id": "trajectory_error_retry",
+          "cost": 1
+        },
+        {
+          "id": "incorrect_parabolic",
+          "label": "Parabolic trajectory (eccentricity = 1.0)",
+          "next_id": "trajectory_error_retry",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "trajectory_confirmed",
+      "title": "Analysis Confirmed",
+      "body_md": "**CORRECT ANALYSIS**: Hyperbolic trajectory confirmed.\n\n**SCIENTIFIC VALIDATION**: The eccentricity > 1.0 and velocity of ~137,000 mph relative to the Sun definitively establishes 3I/ATLAS as an interstellar visitor, not bound to our solar system.\n\n**IMPLICATIONS**: This trajectory suggests the object originated from beyond our solar system, likely from the Milky Way's thick disk population.",
+      "choices": [
+        {
+          "id": "proceed_comparison",
+          "label": "Compare with previous interstellar visitors",
+          "next_id": "interstellar_comparison"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "trajectory_error_retry",
+      "title": "Analysis Error - Review Required",
+      "body_md": "**INCORRECT ASSESSMENT**: Review orbital mechanics fundamentals.\n\n**EDUCATIONAL NOTE**: Interstellar objects follow hyperbolic trajectories with eccentricity > 1.0, indicating they are not gravitationally bound to our solar system.\n\n**RETRY**: Re-analyze the trajectory data with corrected understanding.",
+      "choices": [
+        {
+          "id": "retry_trajectory",
+          "label": "Retry trajectory analysis",
+          "next_id": "skill_trajectory_analysis"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "interstellar_comparison",
+      "title": "Interstellar Visitor Comparison",
+      "body_md": "**COMPARATIVE ANALYSIS**: 3I/ATLAS joins two previously confirmed interstellar visitors:\n\n**1I/'OUMUAMUA** (2017):\n- Extreme elongation (10:1 aspect ratio)\n- First confirmed interstellar object\n- Hawaiian name meaning 'scout'\n\n**2I/BORISOV** (2019):\n- Comet-like composition\n- CO concentration 9-26x higher than normal\n- Named after discoverer Gennady Borisov\n\n**3I/ATLAS** exhibits unique characteristics requiring further analysis.",
+      "choices": [
+        {
+          "id": "compare_oumuamua",
+          "label": "Compare specifically with 'Oumuamua",
+          "next_id": "oumuamua_skill_check"
+        },
+        {
+          "id": "compare_borisov",
+          "label": "Compare specifically with Borisov",
+          "next_id": "borisov_skill_check"
+        }
+      ]
+    },
+    {
+      "id": "oumuamua_skill_check",
+      "title": "Oumuamua Characteristics Assessment",
+      "body_md": "**SKILL CHECK: Historical Comparison**\n\n1I/'Oumuamua was distinguished by which primary characteristic that 3I/ATLAS may share or differ from?",
+      "choices": [
+        {
+          "id": "correct_elongation",
+          "label": "Extreme elongation (10:1 aspect ratio)",
+          "next_id": "oumuamua_comparison_confirmed",
+          "grants": [
+            "skill_comparison",
+            "oumuamua_expertise"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_spherical",
+          "label": "Standard spherical shape",
+          "next_id": "oumuamua_error_retry",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "oumuamua_comparison_confirmed",
+      "title": "Comparative Analysis Validated",
+      "body_md": "**ACCURATE COMPARISON**: 'Oumuamua's extreme 10:1 elongation remains unique among confirmed interstellar objects.\n\n**3I/ATLAS ASSESSMENT**: Current observations suggest more typical dimensions (440m-5.6km diameter), but continued monitoring may reveal additional similarities.\n\n**SCIENTIFIC SIGNIFICANCE**: Each interstellar visitor provides unique data points for understanding galactic formation and interstellar medium composition.",
+      "choices": [
+        {
+          "id": "proceed_borisov",
+          "label": "Compare with Borisov's chemical composition",
+          "next_id": "borisov_skill_check"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "oumuamua_error_retry",
+      "title": "Comparative Analysis Error",
+      "body_md": "**INCORRECT COMPARISON**: Review 'Oumuamua characteristics.\n\n**EDUCATIONAL NOTE**: 1I/'Oumuamua displayed an unprecedented 10:1 aspect ratio, making it the most elongated object ever observed in our solar system.\n\n**RETRY**: Re-evaluate the comparative analysis with accurate historical data.",
+      "choices": [
+        {
+          "id": "retry_oumuamua",
+          "label": "Retry 'Oumuamua comparison",
+          "next_id": "oumuamua_skill_check"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "borisov_skill_check",
+      "title": "Borisov Chemical Analysis",
+      "body_md": "**SKILL CHECK: Chemical Composition**\n\n2I/Borisov was notable for which chemical characteristic that may inform 3I/ATLAS analysis?",
+      "choices": [
+        {
+          "id": "correct_co_enrichment",
+          "label": "CO concentration 9-26x higher than typical comets",
+          "next_id": "borisov_comparison_confirmed",
+          "grants": [
+            "skill_chemistry",
+            "borisov_expertise"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_normal_co",
+          "label": "Standard CO levels typical of solar system comets",
+          "next_id": "borisov_error_retry",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "borisov_comparison_confirmed",
+      "title": "Chemical Analysis Validated",
+      "body_md": "**ACCURATE CHEMICAL ASSESSMENT**: Borisov's CO enrichment (9-26x normal levels) suggests formation in a different chemical environment than our solar system.\n\n**3I/ATLAS IMPLICATIONS**: Age estimates of 7+ billion years suggest formation before our solar system's birth, potentially in a primordial galactic environment.\n\n**RESEARCH VALUE**: These chemical signatures provide crucial data for understanding galactic chemical evolution.",
+      "choices": [
+        {
+          "id": "proceed_velocity",
+          "label": "Analyze velocity and kinematics",
+          "next_id": "velocity_kinematics"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "borisov_error_retry",
+      "title": "Chemical Analysis Error",
+      "body_md": "**INCORRECT CHEMICAL ASSESSMENT**: Review Borisov composition data.\n\n**EDUCATIONAL NOTE**: 2I/Borisov's CO concentration was measured at 9-26 times higher than typical comets, indicating formation in a carbon-monoxide-rich environment.\n\n**RETRY**: Re-analyze the chemical composition with accurate spectroscopic data.",
+      "choices": [
+        {
+          "id": "retry_borisov",
+          "label": "Retry Borisov comparison",
+          "next_id": "borisov_skill_check"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "velocity_kinematics",
+      "title": "Kinematic Analysis",
+      "body_md": "**VELOCITY ASSESSMENT**: 3I/ATLAS velocity analysis provides crucial data for trajectory determination.\n\n**CURRENT DATA**:\n- Velocity relative to Sun: ~137,000 mph\n- Direction: Inbound from interstellar space\n- Trajectory: Hyperbolic escape path\n\n**KINEMATIC SIGNIFICANCE**: This velocity profile confirms the object will not be captured by solar gravity and will return to interstellar space.",
+      "choices": [
+        {
+          "id": "analyze_velocity",
+          "label": "Confirm velocity calculations",
+          "next_id": "perihelion_final",
+          "grants": [
+            "velocity_analysis_complete",
+            "kinematic_expertise"
+          ]
+        },
+        {
+          "id": "analyze_trajectory",
+          "label": "Model complete trajectory",
+          "next_id": "perihelion_final",
+          "grants": [
+            "trajectory_modeling_complete",
+            "orbital_mechanics_mastery"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "perihelion_final",
+      "title": "Final Approach",
+      "body_md": "**PERIHELION EVENT**: October 28, 2025. 3I/ATLAS reaches closest solar approach. All paths converge on this historic moment.",
+      "choices": [
+        {
+          "id": "messenger_choice",
+          "label": "Document for posterity",
+          "next_id": "ending_the_messenger"
+        },
+        {
+          "id": "contact_choice",
+          "label": "Attempt final contact",
+          "next_id": "ending_first_contact_success",
+          "grants": [
+            "first_contact_attempt",
+            "artificial_signals",
+            "global_leadership",
+            "international_cooperation",
+            "unity_comprehension"
+          ]

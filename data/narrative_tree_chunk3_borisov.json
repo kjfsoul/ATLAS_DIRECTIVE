@@ -1,0 +1,234 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "updated_utc": "2025-10-11T03:49:00.000Z",
+    "title": "The ATLAS Directive - Borisov Chemistry Branch",
+    "description": "Advanced chemical composition analysis for interstellar visitor 2I/Borisov",
+    "total_nodes": 8,
+    "endings": 3,
+    "golden_path_nodes": 1,
+    "skill_checks": 2,
+    "branching_points": 2
+  },
+  "root_id": "borisov_chemical_entry",
+  "tokens": {
+    "chrono": {
+      "start": 2,
+      "earn_rules": [
+        {
+          "action": "complete_chemical_analysis",
+          "amount": 2
+        },
+        {
+          "action": "discover_composition_anomaly",
+          "amount": 3
+        },
+        {
+          "action": "master_isotopic_analysis",
+          "amount": 4
+        }
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "borisov_chemical_entry",
+      "title": "Interstellar Chemical Analysis Gateway",
+      "body_md": "**CHEMICAL COMPOSITION SPECIALIZATION**: Advanced analysis protocols engaged for 2I/Borisov comparison.\n\n**BRANCHING FROM**: Main ATLAS Directive analysis stream\n**FOCUS**: Detailed chemical and isotopic composition analysis\n**SCIENTIFIC VALUE**: Understanding interstellar chemistry provides crucial data for galactic chemical evolution models.\n\n**ENTRY REQUIREMENTS**: Basic interstellar visitor knowledge required.",
+      "choices": [
+        {
+          "id": "enter_spectroscopic",
+          "label": "Begin spectroscopic analysis protocols",
+          "next_id": "spectroscopic_analysis",
+          "grants": [
+            "chemical_analysis_started",
+            "spectroscopy_focus"
+          ]
+        },
+        {
+          "id": "enter_isotopic",
+          "label": "Initiate isotopic ratio examination",
+          "next_id": "isotopic_analysis",
+          "grants": [
+            "chemical_analysis_started",
+            "isotopic_focus"
+          ]
+        }
+      ],
+      "cinematic": {
+        "animation_key": "chemical_analysis",
+        "view": "default",
+        "timeline": {
+          "seek_pct": 0.2
+        }
+      }
+    },
+    {
+      "id": "spectroscopic_analysis",
+      "title": "Spectroscopic Composition Analysis",
+      "body_md": "**SPECTROSCOPIC EXAMINATION**: High-resolution spectroscopy reveals 2I/Borisov's chemical fingerprint.\n\n**METHODOLOGY**: Visible and infrared spectroscopy identifies molecular species and their relative abundances.\n\n**PRELIMINARY DATA**:\n- Carbon monoxide (CO) detection: Confirmed\n- Water (H₂O) presence: Standard cometary levels\n- Organic molecules: Complex hydrocarbons detected\n- Dust composition: Silicates and amorphous carbon",
+      "choices": [
+        {
+          "id": "analyze_co_levels",
+          "label": "Quantify carbon monoxide concentration",
+          "next_id": "co_concentration_skill"
+        },
+        {
+          "id": "analyze_organics",
+          "label": "Examine organic molecular complexity",
+          "next_id": "organic_complexity"
+        }
+      ]
+    },
+    {
+      "id": "co_concentration_skill",
+      "title": "Carbon Monoxide Quantification Challenge",
+      "body_md": "**SKILL CHECK: Chemical Analysis**\n\n2I/Borisov's carbon monoxide concentration compared to typical solar system comets:\n\n**SPECTRAL ANALYSIS**: The CO emission lines at 4.67 μm show unprecedented strength, indicating formation in a carbon-monoxide-rich environment.\n\n**QUESTION**: What is the measured CO enrichment factor for 2I/Borisov?",
+      "choices": [
+        {
+          "id": "correct_enrichment",
+          "label": "9-26 times higher than typical comets",
+          "next_id": "co_enrichment_confirmed",
+          "grants": [
+            "skill_chemical_analysis",
+            "co_expertise"
+          ],
+          "rewards": {
+            "tokens": 2
+          }
+        },
+        {
+          "id": "incorrect_normal",
+          "label": "Standard CO levels (1-2x typical)",
+          "next_id": "co_analysis_error",
+          "cost": 1
+        },
+        {
+          "id": "incorrect_high",
+          "label": "Extremely high (50-100x typical)",
+          "next_id": "co_analysis_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "co_enrichment_confirmed",
+      "title": "CO Enrichment Analysis Validated",
+      "body_md": "**ACCURATE CHEMICAL ASSESSMENT**: 2I/Borisov's CO concentration measured at 9-26 times higher than typical solar system comets.\n\n**SCIENTIFIC IMPLICATIONS**:\n- Formation in CO-rich protoplanetary disk\n- Different chemical environment than solar system\n- Potential insights into galactic chemical evolution\n- Evidence of heterogeneous interstellar medium\n\n**ASTROPHYSICAL SIGNIFICANCE**: This enrichment suggests formation conditions vastly different from our solar system's comets.",
+      "choices": [
+        {
+          "id": "proceed_formation",
+          "label": "Model Borisov's formation environment",
+          "next_id": "borisov_formation_modeling"
+        },
+        {
+          "id": "proceed_comparison",
+          "label": "Compare with 3I/ATLAS composition",
+          "next_id": "atlas_comparison"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "co_analysis_error",
+      "title": "Chemical Analysis Error - Review Required",
+      "body_md": "**INCORRECT CO ASSESSMENT**: Review spectroscopic analysis fundamentals.\n\n**EDUCATIONAL NOTE**: 2I/Borisov's CO emission lines were measured at 4.67 μm with intensity 9-26 times higher than typical comets, indicating formation in a carbon-monoxide-enriched environment.\n\n**RETRY**: Re-analyze the spectroscopic data with corrected baseline comparisons.",
+      "choices": [
+        {
+          "id": "retry_co",
+          "label": "Retry CO concentration analysis",
+          "next_id": "co_concentration_skill"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "organic_complexity",
+      "title": "Organic Molecular Complexity Assessment",
+      "body_md": "**ORGANIC ANALYSIS**: Complex organic molecules detected in Borisov's coma provide insights into interstellar chemistry.\n\n**DETECTED SPECIES**:\n- Methanol (CH₃OH): Confirmed\n- Formaldehyde (H₂CO): Present\n- Hydrogen cyanide (HCN): Detected\n- Acetylene (C₂H₂): Identified\n\n**COMPLEXITY INDICATOR**: The presence of multiple carbon-chain molecules suggests formation in a chemically rich environment.",
+      "choices": [
+        {
+          "id": "analyze_prehuman",
+          "label": "Assess prebiotic chemistry potential",
+          "next_id": "ending_prehuman_chemistry"
+        },
+        {
+          "id": "analyze_astrobiology",
+          "label": "Evaluate astrobiological implications",
+          "next_id": "ending_astrobiological_insights"
+        }
+      ]
+    },
+    {
+      "id": "borisov_formation_modeling",
+      "title": "Formation Environment Modeling",
+      "body_md": "**FORMATION ENVIRONMENT RECONSTRUCTION**: Multiple lines of evidence converge on Borisov's origin conditions.\n\n**CHEMICAL SIGNATURES**:\n- High CO/H₂O ratio suggests carbon-rich formation\n- Isotopic ratios indicate ancient formation era\n- Dust composition matches Population II stars\n- Orbital inclination suggests thick disk origin\n\n**MODELING RESULTS**: Formation likely occurred >4.6 billion years ago in the Milky Way's thick disk, predating our solar system.",
+      "choices": [
+        {
+          "id": "model_success",
+          "label": "Formation model complete - high confidence",
+          "next_id": "ending_formation_success"
+        }
+      ]
+    },
+    {
+      "id": "atlas_comparison",
+      "title": "3I/ATLAS Chemical Comparison",
+      "body_md": "**COMPARATIVE CHEMICAL ANALYSIS**: 3I/ATLAS vs 2I/Borisov composition study.\n\n**KEY DIFFERENCES**:\n- 3I/ATLAS: Rocky composition with minimal volatiles\n- 2I/Borisov: Volatile-rich cometary composition\n- CO enrichment: Borisov shows 9-26x, ATLAS shows minimal CO\n- Organic complexity: Borisov more complex, ATLAS simpler\n\n**SCIENTIFIC INSIGHTS**: These differences suggest diverse formation environments within the interstellar medium.",
+      "choices": [
+        {
+          "id": "compare_success",
+          "label": "Comparative analysis complete",
+          "next_id": "ending_comparison_success"
+        }
+      ]
+    },
+    {
+      "id": "ending_prehuman_chemistry",
+      "title": "Prebiotic Chemistry Analysis Complete",
+      "body_md": "**MISSION ACCOMPLISHED**: Prebiotic chemistry potential assessed for interstellar visitor.\n\n**KEY FINDINGS**:\n- Complex organic molecules: Detected (methanol, formaldehyde, HCN)\n- Prebiotic potential: Moderate (building blocks present)\n- Chirality analysis: Racemic mixtures (non-biological)\n- Formation temperature: Consistent with interstellar conditions\n\n**ACHIEVEMENT UNLOCKED**: Prebiotic Chemistry Specialist\n\n**NEXT STEPS**: These findings contribute to understanding the chemical precursors of life in the galaxy.",
+      "choices": [],
+      "grants": [
+        "prebiotic_chemistry_complete",
+        "chemistry_specialist"
+      ]
+    },
+    {
+      "id": "ending_astrobiological_insights",
+      "title": "Astrobiological Assessment Complete",
+      "body_md": "**MISSION ACCOMPLISHED**: Astrobiological implications fully evaluated.\n\n**KEY FINDINGS**:\n- Habitability indicators: Negative (extreme formation conditions)\n- Panspermia potential: Low (harsh interstellar journey)\n- Chemical evolution: Evidence of complex interstellar organic chemistry\n- Life precursor transport: Possible but inefficient mechanism\n\n**ACHIEVEMENT UNLOCKED**: Astrobiological Analyst\n\n**NEXT STEPS**: Findings inform search for technosignatures and biological markers in future visitors.",
+      "choices": [],
+      "grants": [
+        "astrobiological_assessment_complete",
+        "astrobiological_analyst"
+      ]
+    },
+    {
+      "id": "ending_formation_success",
+      "title": "Formation Environment Reconstruction Complete",
+      "body_md": "**MISSION ACCOMPLISHED**: Borisov formation environment successfully modeled.\n\n**KEY FINDINGS**:\n- Formation era: >4.6 billion years ago (pre-solar system)\n- Formation location: Milky Way thick disk\n- Chemical environment: Carbon-monoxide enriched\n- Parent body: Likely planetesimal from ancient star system\n\n**ACHIEVEMENT UNLOCKED**: Formation Modeling Expert\n\n**NEXT STEPS**: Model refinement with additional isotopic data from future observations.",
+      "choices": [],
+      "grants": [
+        "formation_modeling_complete",
+        "formation_expert"
+      ]
+    },
+    {
+      "id": "ending_comparison_success",
+      "title": "Interstellar Visitor Comparison Complete",
+      "body_md": "**MISSION ACCOMPLISHED**: Comprehensive chemical comparison between interstellar visitors completed.\n\n**KEY FINDINGS**:\n- 2I/Borisov: Volatile-rich, CO-enriched, complex organics\n- 3I/ATLAS: Rocky composition, minimal volatiles, simple chemistry\n- Diversity evidence: Interstellar objects show remarkable chemical variety\n- Formation environments: Multiple distinct chemical reservoirs in galaxy\n\n**ACHIEVEMENT UNLOCKED**: Comparative Chemistry Authority\n\n**NEXT STEPS**: Use these insights to predict composition of future interstellar visitors.",
+      "choices": [],
+      "grants": [
+        "comparison_chemistry_complete",
+        "chemistry_authority"
+      ]
+    }
+  ]
+}

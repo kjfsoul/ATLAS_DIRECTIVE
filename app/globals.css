@@ -1,0 +1,150 @@
+/* ATLAS Directive - Global Styles */
+
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Arial', sans-serif;
+}
+
+.tracker-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.narrative-container {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  right: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.narrative-overlay {
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Atlas Directive specific styles */
+.atlas-directive {
+  color: white;
+  padding: 1.5rem;
+}
+
+.atlas-directive .stage-title {
+  color: #00ffff;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.atlas-directive .stage-text {
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.atlas-directive .choice-button {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid #00ffff;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.atlas-directive .choice-button:hover {
+  background: rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.atlas-directive .choice-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 3D Tracker styles */
+.atlas-3d-tracker-enhanced {
+  width: 100%;
+  height: 100%;
+}
+
+.tracker-canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Loading and transition states */
+.loading-state, .transition-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  z-index: 100;
+}
+
+.orbit-animation {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #00ffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .narrative-container {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+
+  .narrative-overlay {
+    border-radius: 12px;
+  }
+
+  .atlas-directive {
+    padding: 1rem;
+  }
+
+  .atlas-directive .stage-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Ensure 3D scene is never blocked */
+.narrative-container * {
+  pointer-events: auto;
+}
+
+.narrative-container .atlas-directive {
+  pointer-events: auto;
+}

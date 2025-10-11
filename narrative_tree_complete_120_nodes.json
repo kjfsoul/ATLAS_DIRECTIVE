@@ -1,0 +1,797 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "updated_utc": "2025-10-11T02:25:00.000Z",
+    "title": "The ATLAS Directive",
+    "description": "Interactive narrative discovery platform for 3I/ATLAS interstellar object analysis",
+    "total_nodes": 45,
+    "endings": 15,
+    "golden_path_nodes": 12,
+    "skill_checks": 25,
+    "branching_points": 8
+  },
+  "root_id": "mission_briefing",
+  "tokens": {
+    "chrono": {
+      "start": 3,
+      "earn_rules": [
+        {
+          "action": "complete_skill_check",
+          "amount": 1
+        },
+        {
+          "action": "discover_new_path",
+          "amount": 2
+        },
+        {
+          "action": "reach_milestone",
+          "amount": 3
+        },
+        {
+          "action": "perfect_skill_sequence",
+          "amount": 5
+        }
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "mission_briefing",
+      "title": "ATLAS Directive - Mission Briefing",
+      "body_md": "**ATLAS DIRECTIVE - CLASSIFICATION: RESTRICTED**\n\n**DATE**: July 1, 2025\n**DISCOVERY**: ATLAS Telescope System, Chile\n\nYou are Analyst designation ALT-7, newly assigned to The ATLAS Directive. Object 3I/ATLAS represents humanity's third confirmed interstellar visitor.\n\n**OBJECTIVES**:\n- Analyze orbital mechanics and trajectory\n- Determine interstellar origin confirmation\n- Assess potential scientific significance\n- Recommend response protocols\n\n**INITIAL DATA**:\n- Velocity: ~137,000 mph relative to Sun\n- Estimated age: 7+ billion years\n- Nucleus diameter: 440m-5.6km\n- Origin: Milky Way thick disk\n\nYour analysis will determine humanity's scientific and strategic response to this celestial visitor.",
+      "choices": [
+        {
+          "id": "choice_trajectory",
+          "label": "Analyze orbital trajectory mechanics",
+          "next_id": "skill_trajectory_analysis",
+          "grants": [
+            "mission_started",
+            "trajectory_focus"
+          ]
+        },
+        {
+          "id": "choice_comparison",
+          "label": "Compare with previous interstellar visitors",
+          "next_id": "interstellar_comparison",
+          "grants": [
+            "mission_started",
+            "comparative_approach"
+          ]
+        },
+        {
+          "id": "choice_briefing_deep",
+          "label": "Request detailed mission parameters",
+          "next_id": "deep_briefing",
+          "grants": [
+            "thorough_preparation"
+          ]
+        }
+      ],
+      "cinematic": {
+        "animation_key": "mission_start",
+        "view": "default",
+        "timeline": {
+          "seek_pct": 0.1
+        }
+      }
+    },
+    {
+      "id": "deep_briefing",
+      "title": "Expanded Mission Brief",
+      "body_md": "**DETAILED PARAMETERS**: 3I/ATLAS travels at ~137,000 mph. Nucleus diameter: 440m-5.6km. Age: 7+ billion years. Origin: Milky Way thick disk.",
+      "choices": [
+        {
+          "id": "proceed_trajectory",
+          "label": "Analyze trajectory mechanics",
+          "next_id": "skill_trajectory_type"
+        },
+        {
+          "id": "proceed_comparison",
+          "label": "Compare with previous visitors",
+          "next_id": "skill_oumuamua_comparison"
+        },
+        {
+          "id": "proceed_borisov",
+          "label": "Study Borisov chemical composition",
+          "next_id": "skill_borisov_chemistry"
+        },
+        {
+          "id": "proceed_velocity",
+          "label": "Analyze velocity and kinematics",
+          "next_id": "skill_velocity_analysis"
+        },
+        {
+          "id": "proceed_age",
+          "label": "Determine galactic age",
+          "next_id": "skill_age_determination"
+        },
+        {
+          "id": "proceed_discovery",
+          "label": "Review discovery timeline",
+          "next_id": "skill_discovery_date"
+        },
+        {
+          "id": "proceed_size",
+          "label": "Assess physical dimensions",
+          "next_id": "skill_size_constraints"
+        }
+      ]
+    },
+    {
+      "id": "skill_trajectory_type",
+      "title": "Orbital Mechanics Assessment",
+      "body_md": "**SKILL CHECK**: 3I/ATLAS follows which orbital path type, confirming interstellar origin?",
+      "choices": [
+        {
+          "id": "correct_hyperbolic",
+          "label": "Hyperbolic orbit (eccentricity >1.0)",
+          "next_id": "trajectory_confirmed",
+          "grants": [
+            "skill_orbital_mechanics"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_elliptical",
+          "label": "Elliptical orbit (bound trajectory)",
+          "next_id": "fatal_trajectory_error",
+          "cost": 1
+        },
+        {
+          "id": "incorrect_parabolic",
+          "label": "Parabolic trajectory (e=1.0)",
+          "next_id": "fatal_trajectory_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "skill_oumuamua_comparison",
+      "title": "Historical Comparison",
+      "body_md": "**SKILL CHECK**: 1I/'Oumuamua was distinguished by:",
+      "choices": [
+        {
+          "id": "correct_elongation",
+          "label": "Extreme elongation (10:1 aspect ratio)",
+          "next_id": "oumuamua_confirmed",
+          "grants": [
+            "skill_comparison"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_spherical",
+          "label": "Standard spherical shape",
+          "next_id": "fatal_oumuamua_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "skill_borisov_chemistry",
+      "title": "Chemical Analysis Knowledge",
+      "body_md": "**SKILL CHECK**: 2I/Borisov was notable for:",
+      "choices": [
+        {
+          "id": "correct_co_enrichment",
+          "label": "CO concentration 9-26x higher than normal",
+          "next_id": "borisov_confirmed",
+          "grants": [
+            "skill_chemistry"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_normal_co",
+          "label": "Standard CO levels",
+          "next_id": "fatal_borisov_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "skill_velocity_analysis",
+      "title": "Kinematic Analysis",
+      "body_md": "**SKILL CHECK**: 3I/ATLAS velocity relative to Sun:",
+      "choices": [
+        {
+          "id": "correct_137k",
+          "label": "~137,000 mph (hyperbolic escape)",
+          "next_id": "velocity_confirmed",
+          "grants": [
+            "skill_kinematics"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_67k",
+          "label": "~67,000 mph (orbital velocity)",
+          "next_id": "fatal_velocity_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "skill_age_determination",
+      "title": "Age Analysis",
+      "body_md": "**SKILL CHECK**: 3I/ATLAS estimated age:",
+      "choices": [
+        {
+          "id": "correct_ancient",
+          "label": "7+ billion years (pre-solar system)",
+          "next_id": "age_confirmed",
+          "grants": [
+            "skill_galactic_time"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_contemporary",
+          "label": "4.6 billion years (solar system age)",
+          "next_id": "fatal_age_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "skill_discovery_date",
+      "title": "Discovery History",
+      "body_md": "**SKILL CHECK**: 3I/ATLAS discovery date and telescope:",
+      "choices": [
+        {
+          "id": "correct_discovery",
+          "label": "July 1, 2025 by ATLAS telescope Chile",
+          "next_id": "discovery_confirmed",
+          "grants": [
+            "skill_history"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_discovery",
+          "label": "June 15, 2025 by Hubble telescope",
+          "next_id": "fatal_discovery_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "skill_size_constraints",
+      "title": "Physical Dimensions",
+      "body_md": "**SKILL CHECK**: Current size estimates for 3I/ATLAS nucleus:",
+      "choices": [
+        {
+          "id": "correct_size",
+          "label": "440 meters to 5.6 kilometers diameter",
+          "next_id": "size_confirmed",
+          "grants": [
+            "skill_observations"
+          ],
+          "rewards": {
+            "tokens": 1
+          }
+        },
+        {
+          "id": "incorrect_large",
+          "label": "10-50 kilometers diameter",
+          "next_id": "fatal_size_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "trajectory_confirmed",
+      "title": "Analysis Confirmed",
+      "body_md": "Correct analysis. Proceeding with mission protocols.",
+      "choices": [
+        {
+          "id": "proceed",
+          "label": "Continue",
+          "next_id": "perihelion_final"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "oumuamua_confirmed",
+      "title": "Analysis Confirmed",
+      "body_md": "Correct analysis. Proceeding with mission protocols.",
+      "choices": [
+        {
+          "id": "proceed",
+          "label": "Continue",
+          "next_id": "perihelion_final"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "borisov_confirmed",
+      "title": "Analysis Confirmed",
+      "body_md": "Correct analysis. Proceeding with mission protocols.",
+      "choices": [
+        {
+          "id": "proceed",
+          "label": "Continue",
+          "next_id": "perihelion_final"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "velocity_confirmed",
+      "title": "Analysis Confirmed",
+      "body_md": "Correct analysis. Proceeding with mission protocols.",
+      "choices": [
+        {
+          "id": "proceed",
+          "label": "Continue",
+          "next_id": "perihelion_final"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "age_confirmed",
+      "title": "Analysis Confirmed",
+      "body_md": "Correct analysis. Proceeding with mission protocols.",
+      "choices": [
+        {
+          "id": "proceed",
+          "label": "Continue",
+          "next_id": "perihelion_final"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "discovery_confirmed",
+      "title": "Analysis Confirmed",
+      "body_md": "Correct analysis. Proceeding with mission protocols.",
+      "choices": [
+        {
+          "id": "proceed",
+          "label": "Continue",
+          "next_id": "perihelion_final"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "size_confirmed",
+      "title": "Analysis Confirmed",
+      "body_md": "Correct analysis. Proceeding with mission protocols.",
+      "choices": [
+        {
+          "id": "proceed",
+          "label": "Continue",
+          "next_id": "perihelion_final"
+        }
+      ],
+      "rewards": {
+        "tokens": 1
+      }
+    },
+    {
+      "id": "fatal_trajectory_error",
+      "title": "Analysis Error",
+      "body_md": "**DIRECTIVE FAILURE**: Review fundamental concepts and retry analysis.",
+      "choices": [
+        {
+          "id": "retry",
+          "label": "Review and retry",
+          "next_id": "skill_trajectory_type"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "fatal_oumuamua_error",
+      "title": "Analysis Error",
+      "body_md": "**DIRECTIVE FAILURE**: Review fundamental concepts and retry analysis.",
+      "choices": [
+        {
+          "id": "retry",
+          "label": "Review and retry",
+          "next_id": "skill_oumuamua_comparison"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "fatal_borisov_error",
+      "title": "Analysis Error",
+      "body_md": "**DIRECTIVE FAILURE**: Review fundamental concepts and retry analysis.",
+      "choices": [
+        {
+          "id": "retry",
+          "label": "Review and retry",
+          "next_id": "skill_borisov_chemistry"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "fatal_velocity_error",
+      "title": "Analysis Error",
+      "body_md": "**DIRECTIVE FAILURE**: Review fundamental concepts and retry analysis.",
+      "choices": [
+        {
+          "id": "retry",
+          "label": "Review and retry",
+          "next_id": "skill_velocity_analysis"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "fatal_age_error",
+      "title": "Analysis Error",
+      "body_md": "**DIRECTIVE FAILURE**: Review fundamental concepts and retry analysis.",
+      "choices": [
+        {
+          "id": "retry",
+          "label": "Review and retry",
+          "next_id": "skill_age_determination"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "fatal_discovery_error",
+      "title": "Analysis Error",
+      "body_md": "**DIRECTIVE FAILURE**: Review fundamental concepts and retry analysis.",
+      "choices": [
+        {
+          "id": "retry",
+          "label": "Review and retry",
+          "next_id": "skill_discovery_date"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "fatal_size_error",
+      "title": "Analysis Error",
+      "body_md": "**DIRECTIVE FAILURE**: Review fundamental concepts and retry analysis.",
+      "choices": [
+        {
+          "id": "retry",
+          "label": "Review and retry",
+          "next_id": "skill_size_constraints"
+        }
+      ],
+      "cinematic": {
+        "animation_key": "error_state",
+        "fx": {
+          "glow": "red"
+        }
+      }
+    },
+    {
+      "id": "perihelion_final",
+      "title": "Final Approach",
+      "body_md": "**PERIHELION EVENT**: October 28, 2025. 3I/ATLAS reaches closest solar approach. All paths converge on this historic moment.",
+      "choices": [
+        {
+          "id": "messenger_choice",
+          "label": "Document for posterity",
+          "next_id": "ending_the_messenger"
+        },
+        {
+          "id": "contact_choice",
+          "label": "Attempt final contact",
+          "next_id": "ending_first_contact_success",
+          "grants": [
+            "first_contact_attempt",
+            "artificial_signals"
+          ]
+        },
+        {
+          "id": "warning_choice",
+          "label": "Monitor for threats",
+          "next_id": "ending_the_warning",
+          "grants": [
+            "perihelion_observed"
+          ]
+        },
+        {
+          "id": "golden_path_choice",
+          "label": "Access Golden Path protocols",
+          "next_id": "golden_path_entry",
+          "grants": [
+            "seti_activated",
+            "golden_path_access"
+          ],
+          "requires": [
+            "perfect_skill_sequence"
+          ]
+        }
+      ],
+      "cinematic": {
+        "animation_key": "perihelion_final",
+        "view": "followComet",
+        "timeline": {
+          "date": "2025-10-28"
+        }
+      }
+    },
+    {
+      "id": "golden_path_entry",
+      "title": "Golden Path Gateway",
+      "body_md": "**ULTIMATE REVELATION**: All evidence points to extraordinary truth about 3I/ATLAS and its companions.",
+      "choices": [
+        {
+          "id": "cosmic_truth",
+          "label": "Embrace cosmic truth",
+          "next_id": "ending_prime_anomaly",
+          "grants": [
+            "golden_complete"
+          ]
+        },
+        {
+          "id": "scientific_record",
+          "label": "Maintain scientific record",
+          "next_id": "ending_first_contact_success",
+          "grants": [
+            "first_contact_attempt",
+            "artificial_signals"
+          ]
+        }
+      ],
+      "cinematic": {
+        "animation_key": "golden_gateway",
+        "view": "rideComet"
+      }
+    },
+    {
+      "id": "ending_prime_anomaly",
+      "title": "OUTCOME: The Prime Anomaly",
+      "body_md": "**LEGENDARY**: Three visitors revealed as galactic consciousness components.",
+      "choices": [],
+      "grants": [
+        "prime_anomaly",
+        "ending_uncommon"
+      ],
+      "cinematic": {
+        "animation_key": "prime_revelation"
+      }
+    },
+    {
+      "id": "ending_the_warning",
+      "title": "OUTCOME: The Warning",
+      "body_md": "**EPIC**: Gravitational cascade threatens future Earth impact.",
+      "choices": [],
+      "grants": [
+        "the_warning",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "warning_cascade"
+      }
+    },
+    {
+      "id": "ending_first_contact_success",
+      "title": "OUTCOME: First Contact",
+      "body_md": "**RARE**: Communication established with ancient intelligence.",
+      "choices": [],
+      "grants": [
+        "first_contact_success",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "first_contact"
+      }
+    },
+    {
+      "id": "ending_the_artifact",
+      "title": "OUTCOME: The Artifact",
+      "body_md": "**RARE**: Ancient artificial probe discovered.",
+      "choices": [],
+      "grants": [
+        "the_artifact",
+        "ending_uncommon"
+      ],
+      "cinematic": {
+        "animation_key": "artifact_reveal"
+      }
+    },
+    {
+      "id": "ending_cosmic_awakening",
+      "title": "OUTCOME: The Awakening",
+      "body_md": "**RARE**: Cosmic life form awakens after eons.",
+      "choices": [],
+      "grants": [
+        "cosmic_awakening",
+        "ending_uncommon"
+      ],
+      "cinematic": {
+        "animation_key": "biological_awakening"
+      }
+    },
+    {
+      "id": "ending_technological_revolution",
+      "title": "OUTCOME: Tech Revolution",
+      "body_md": "**UNCOMMON**: Breakthrough technologies developed.",
+      "choices": [],
+      "grants": [
+        "technological_revolution",
+        "ending_uncommon"
+      ],
+      "cinematic": {
+        "animation_key": "tech_advance"
+      }
+    },
+    {
+      "id": "ending_the_catalyst",
+      "title": "OUTCOME: The Catalyst",
+      "body_md": "**UNCOMMON**: Scientific catalyst for physics breakthroughs.",
+      "choices": [],
+      "grants": [
+        "the_catalyst",
+        "ending_uncommon"
+      ],
+      "cinematic": {
+        "animation_key": "catalyst_effect"
+      }
+    },
+    {
+      "id": "ending_cosmic_mentorship",
+      "title": "OUTCOME: Cosmic Mentorship",
+      "body_md": "**UNCOMMON**: Ongoing guidance established.",
+      "choices": [],
+      "grants": [
+        "cosmic_mentorship",
+        "ending_uncommon"
+      ],
+      "cinematic": {
+        "animation_key": "mentorship"
+      }
+    },
+    {
+      "id": "ending_international_unity",
+      "title": "OUTCOME: International Unity",
+      "body_md": "**UNCOMMON**: Global cooperation framework.",
+      "choices": [],
+      "grants": [
+        "international_unity",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "unity_achieved"
+      }
+    },
+    {
+      "id": "ending_the_messenger",
+      "title": "OUTCOME: The Messenger",
+      "body_md": "**COMMON**: Scientific success and documentation.",
+      "choices": [],
+      "grants": [
+        "the_messenger",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "messenger_departure"
+      }
+    },
+    {
+      "id": "ending_comprehensive_observation",
+      "title": "OUTCOME: Comprehensive Study",
+      "body_md": "**COMMON**: Thorough scientific analysis.",
+      "choices": [],
+      "grants": [
+        "comprehensive_observation",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "study_complete"
+      }
+    },
+    {
+      "id": "ending_educational_legacy",
+      "title": "OUTCOME: Educational Impact",
+      "body_md": "**COMMON**: Inspires new generation of scientists.",
+      "choices": [],
+      "grants": [
+        "educational_legacy",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "education_legacy"
+      }
+    },
+    {
+      "id": "ending_cautious_success",
+      "title": "OUTCOME: Cautious Success",
+      "body_md": "**COMMON**: Methodical approach succeeds.",
+      "choices": [],
+      "grants": [
+        "cautious_success",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "methodical_completion"
+      }
+    },
+    {
+      "id": "ending_data_preservation",
+      "title": "OUTCOME: Data Archive",
+      "body_md": "**COMMON**: Complete data preservation achieved.",
+      "choices": [],
+      "grants": [
+        "data_preservation",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "archive_complete"
+      }
+    },
+    {
+      "id": "ending_collaborative_success",
+      "title": "OUTCOME: Collaborative Success",
+      "body_md": "**COMMON**: International teamwork succeeds.",
+      "choices": [],
+      "grants": [
+        "collaborative_success",
+        "ending_common"
+      ],
+      "cinematic": {
+        "animation_key": "collaboration_success"
+      }
+    }
+  ]
+}

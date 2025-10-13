@@ -66,6 +66,9 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chunkLoadError, setChunkLoadError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [showVelocityVector, setShowVelocityVector] = useState(false);
+  const [showAgeTimeline, setShowAgeTimeline] = useState(false);
 
   /**
    * Enhanced narrative tree loading with chunk4-specific validation
@@ -392,20 +395,102 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
     }
   }, [gameState.chronoTokens]);
 
+  // Enhanced retry mechanism with exponential backoff
+  const retryChunkLoading = useCallback(async () => {
+    setRetryCount(prev => prev + 1);
+    setChunkLoadError(null);
+    setError(null);
+
+    // Exponential backoff: wait longer for each retry
+    const delay = Math.min(1000 * Math.pow(2, retryCount), 10000);
+    console.log(`Retrying chunk load in ${delay}ms (attempt ${retryCount + 1})`);
+
+    setTimeout(() => {
+      window.location.reload();
+    }, delay);
+  }, [retryCount]);
+
+  // Chunk4-specific visualization helpers
+  const getScientificContext = useCallback((stageId: string) => {
+    if (stageId.includes('velocity') || stageId.includes('kinematic')) {
+      return {
+        type: 'velocity',
+        value: '~137,000 mph',
+        unit: 'relative to Sun',
+        significance: 'Hyperbolic escape velocity confirming interstellar origin'
+      };
+    }
+    if (stageId.includes('age') || stageId.includes('formation')) {
+      return {
+        type: 'age',
+        value: '7+ billion years',
+        unit: 'before present',
+        significance: 'Pre-solar system formation in Milky Way thick disk'
+      };
+    }
+    if (stageId.includes('discovery') || stageId.includes('telescope')) {
+      return {
+        type: 'discovery',
+        value: 'July 1, 2025',
+        unit: 'ATLAS telescope system',
+        significance: 'Third confirmed interstellar visitor detection'
+      };
+    }
+    return null;
+  }, []);
+
+  // Calculate scientific progress for current stage
+  const getScientificProgress = useCallback(() => {
+    const context = getScientificContext(gameState.currentStage);
+    if (!context) return null;
+
+    const baseProgress = (gameState.userProfile.path.length / 12) * 100;
+    return Math.min(100, baseProgress + (gameState.userProfile.flags?.length || 0) * 5);
+  }, [gameState, getScientificContext]);
+
+  // Enhanced kinematic data for visualization
+  const kinematicData = {
+    velocity: {
+      value: 137000,
+      unit: 'mph',
+      relativeTo: 'Sun',
+      type: 'hyperbolic',
+      confidence: 0.95
+    },
+    age: {
+      value: 7.2,
+      unit: 'billion_years',
+      formation: 'thick_disk',
+      confidence: 0.87
+    },
+    discovery: {
+      date: '2025-07-01',
+      telescope: 'ATLAS',
+      location: 'Haleakala, Hawaii',
+      magnitude: 18.2
+    }
+  };
+
   // Enhanced error state rendering with chunk4-specific information
   if (error || chunkLoadError) {
     return (
       <div className={`atlas-directive ${className}`}>
         <div className="narrative-error">
           <div className="error-content">
-            <h3>⚠️ System Status</h3>
+            <h3>⚠️ Chunk4 System Status</h3>
             <p>{error || chunkLoadError}</p>
             {chunkLoadError && (
               <div className="error-details">
                 <p>Chunk4: {narrativeChunk}</p>
-                <button onClick={() => window.location.reload()}>
-                  Retry Loading Chunk4
-                </button>
+                <p>Retry attempts: {retryCount}</p>
+                <div className="error-actions">
+                  <button onClick={() => retryChunkLoading()}>
+                    Retry Loading Chunk4
+                  </button>
+                  <button onClick={() => window.location.reload()}>
+                    Full Reload
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -456,6 +541,62 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
             </ReactMarkdown>
           </div>
 
+          {/* Chunk4-Specific Visualizations */}
+          {showVelocityVector && currentStage?.id.includes('velocity') && (
+            <div className="velocity-visualization">
+              <h4>Velocity Vector Analysis</h4>
+              <div className="velocity-diagram">
+                <div className="velocity-vector">
+                  <div className="vector-line" style={{ width: '200px', height: '4px', background: 'linear-gradient(to right, #ff6b6b, #4ecdc4)' }}>
+                    <div className="vector-arrow">→</div>
+                    <div className="vector-label">137,000 mph</div>
+                  </div>
+                  <div className="vector-info">
+                    <p><strong>Direction:</strong> Hyperbolic escape trajectory</p>
+                    <p><strong>Relative to:</strong> Solar system barycenter</p>
+                    <p><strong>Confidence:</strong> 95%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showAgeTimeline && currentStage?.id.includes('age') && (
+            <div className="age-timeline">
+              <h4>Formation Age Timeline</h4>
+              <div className="timeline-container">
+                <div className="timeline">
+                  <div className="timeline-event">
+                    <div className="event-marker"></div>
+                    <div className="event-info">
+                      <strong>3I/ATLAS Formation</strong>
+                      <span>7+ billion years ago</span>
+                    </div>
+                  </div>
+                  <div className="timeline-event">
+                    <div className="event-marker"></div>
+                    <div className="event-info">
+                      <strong>Solar System Formation</strong>
+                      <span>4.6 billion years ago</span>
+                    </div>
+                  </div>
+                  <div className="timeline-event">
+                    <div className="event-marker"></div>
+                    <div className="event-info">
+                      <strong>Present Day</strong>
+                      <span>2025 CE</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="timeline-scale">
+                  <span>Big Bang</span>
+                  <span>13.8 Gya</span>
+                  <span>Present</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Choices */}
           {currentStage.choices && currentStage.choices.length > 0 && (
             <div className="choices-container">
@@ -504,6 +645,34 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
 
       {/* Enhanced Side Panel UI for Chunk4 */}
       <div className="ui-sidebar">
+        {/* Scientific Context Display */}
+        {getScientificContext(gameState.currentStage) && (
+          <div className="scientific-context">
+            <h4>Current Analysis</h4>
+            <div className="context-display">
+              <div className="context-type">{getScientificContext(gameState.currentStage)?.type}</div>
+              <div className="context-value">{getScientificContext(gameState.currentStage)?.value}</div>
+              <div className="context-significance">{getScientificContext(gameState.currentStage)?.significance}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Scientific Progress Bar */}
+        {getScientificProgress() !== null && (
+          <div className="scientific-progress">
+            <h4>Analysis Progress</h4>
+            <div className="progress-container">
+              <div className="progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${getScientificProgress()}%` }}
+                />
+              </div>
+              <span className="progress-text">{Math.round(getScientificProgress() || 0)}%</span>
+            </div>
+          </div>
+        )}
+
         {/* Chrono Tokens */}
         <div className="token-display">
           <h4>Chunk4 Tokens</h4>
@@ -596,6 +765,29 @@ export const AtlasDirective: React.FC<AtlasDirectiveProps> = ({
               <span>Chunk Progress:</span>
               <span>{gameState.completedStages.length}/{narrativeTree.meta.total_nodes}</span>
             </div>
+          )}
+        </div>
+
+        {/* Chunk4-Specific Visualization Controls */}
+        <div className="chunk4-controls">
+          <h4>Chunk4 Analysis Tools</h4>
+
+          {currentStage?.id.includes('velocity') && (
+            <button
+              className="visualization-toggle"
+              onClick={() => setShowVelocityVector(!showVelocityVector)}
+            >
+              {showVelocityVector ? 'Hide' : 'Show'} Velocity Vector
+            </button>
+          )}
+
+          {currentStage?.id.includes('age') && (
+            <button
+              className="visualization-toggle"
+              onClick={() => setShowAgeTimeline(!showAgeTimeline)}
+            >
+              {showAgeTimeline ? 'Hide' : 'Show'} Age Timeline
+            </button>
           )}
         </div>
 

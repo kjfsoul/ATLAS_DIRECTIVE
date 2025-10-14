@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "updated_utc": "2025-10-14T00:00:00.000Z",
+    "title": "The ATLAS Directive - Impact Scenario Modeling",
+    "description": "High-stakes analysis of potential impact scenarios for 3I/ATLAS.",
+    "total_nodes": 10,
+    "endings": 4,
+    "golden_path_nodes": 0,
+    "skill_checks": 3,
+    "branching_points": 3
+  },
+  "root_id": "impact_scenario_entry",
+  "tokens": {
+    "chrono": {
+      "start": 3
+    }
+  },
+  "nodes": [
+    {
+      "id": "impact_scenario_entry",
+      "title": "Impact Scenario Modeling Gateway",
+      "body_md": "**IMPACT SCENARIO MODELING**: Gravitational analysis reveals a non-zero probability of 3I/ATLAS impacting a celestial body in our solar system.\\n\\n**BRANCHING FROM**: Main ATLAS Directive analysis stream\\n**FOCUS**: Trajectory analysis, risk assessment, and mitigation planning.\\n**SCIENTIFIC VALUE**: Understanding the potential risks of interstellar objects is crucial for planetary defense.",
+      "choices": [
+        {
+          "id": "begin_impact_analysis",
+          "label": "Begin impact probability analysis",
+          "next_id": "impact_probability_skill",
+          "grants": [
+            "impact_analysis_started"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impact_probability_skill",
+      "title": "Impact Probability Calculation",
+      "body_md": "**SKILL CHECK: Orbital Mechanics**\\n\\nBased on the latest trajectory data, which celestial body has the highest probability of being impacted by 3I/ATLAS?",
+      "choices": [
+        {
+          "id": "correct_mars",
+          "label": "Mars (0.1% probability)",
+          "next_id": "mars_impact_scenario",
+          "grants": [
+            "skill_impact_analysis"
+          ],
+          "rewards": {
+            "tokens": 2
+          }
+        },
+        {
+          "id": "incorrect_earth",
+          "label": "Earth (0.01% probability)",
+          "next_id": "impact_analysis_error",
+          "cost": 1
+        },
+        {
+          "id": "incorrect_jupiter",
+          "label": "Jupiter (0.05% probability)",
+          "next_id": "impact_analysis_error",
+          "cost": 1
+        }
+      ]
+    },
+    {
+      "id": "impact_analysis_error",
+      "title": "Impact Analysis Error",
+      "body_md": "**INCORRECT ANALYSIS**: Your calculations are flawed. Re-run the simulation and account for all gravitational perturbations.",
+      "choices": [
+        {
+          "id": "retry_impact_analysis",
+          "label": "Retry impact probability analysis",
+          "next_id": "impact_probability_skill"
+        }
+      ]
+    },
+    {
+      "id": "mars_impact_scenario",
+      "title": "Mars Impact Scenario",
+      "body_md": "**MARS IMPACT SCENARIO**: Your analysis is correct. There is a 0.1% probability of 3I/ATLAS impacting Mars. This is a significant risk that requires immediate attention.\\n\\n**NEXT STEPS**: Develop a mitigation plan.",
+      "choices": [
+        {
+          "id": "develop_mitigation_plan",
+          "label": "Develop a mitigation plan",
+          "next_id": "mitigation_plan_options"
+        }
+      ]
+    },
+    {
+      "id": "mitigation_plan_options",
+      "title": "Mitigation Plan Options",
+      "body_md": "**MITIGATION PLAN OPTIONS**: You have several options to mitigate the risk of a Mars impact. Each has its own risks and rewards.",
+      "choices": [
+        {
+          "id": "laser_ablation",
+          "label": "Laser Ablation (High Risk, High Reward)",
+          "next_id": "laser_ablation_scenario"
+        },
+        {
+          "id": "kinetic_impactor",
+          "label": "Kinetic Impactor (Medium Risk, Medium Reward)",
+          "next_id": "kinetic_impactor_scenario"
+        },
+        {
+          "id": "gravity_tractor",
+          "label": "Gravity Tractor (Low Risk, Low Reward)",
+          "next_id": "gravity_tractor_scenario"
+        }
+      ]
+    },
+    {
+      "id": "laser_ablation_scenario",
+      "title": "Laser Ablation Scenario",
+      "body_md": "**LASER ABLATION**: This plan involves using a high-powered laser to vaporize parts of 3I/ATLAS, altering its trajectory. It's a high-risk, high-reward option that could either save Mars or shatter the object into multiple, unpredictable threats.",
+      "choices": [
+        {
+          "id": "laser_ablation_success",
+          "label": "The laser successfully diverts the object.",
+          "next_id": "ending_laser_ablation_success"
+        },
+        {
+          "id": "laser_ablation_failure",
+          "label": "The laser shatters the object, creating a new crisis.",
+          "next_id": "ending_laser_ablation_failure"
+        }
+      ]
+    },
+    {
+      "id": "kinetic_impactor_scenario",
+      "title": "Kinetic Impactor Scenario",
+      "body_md": "**KINETIC IMPACTOR**: This plan involves sending a spacecraft to collide with 3I/ATLAS, altering its trajectory. It's a medium-risk, medium-reward option with a moderate chance of success.",
+      "choices": [
+        {
+          "id": "kinetic_impactor_success",
+          "label": "The impactor successfully diverts the object.",
+          "next_id": "ending_kinetic_impactor_success"
+        },
+        {
+          "id": "kinetic_impactor_failure",
+          "label": "The impactor fails to significantly alter the object's course.",
+          "next_id": "ending_kinetic_impactor_failure"
+        }
+      ]
+    },
+    {
+      "id": "gravity_tractor_scenario",
+      "title": "Gravity Tractor Scenario",
+      "body_md": "**GRAVITY TRACTOR**: This plan involves sending a spacecraft to fly alongside 3I/ATLAS, using its gravity to slowly pull the object off course. It's a low-risk, low-reward option that is slow but reliable.",
+      "choices": [
+        {
+          "id": "gravity_tractor_success",
+          "label": "The tractor successfully diverts the object over several months.",
+          "next_id": "ending_gravity_tractor_success"
+        }
+      ]
+    },
+    {
+      "id": "ending_laser_ablation_success",
+      "title": "Laser Ablation Success",
+      "body_md": "**MISSION ACCOMPLISHED**: The laser ablation plan was a resounding success. 3I/ATLAS was successfully diverted from its collision course with Mars, and the object is now on a safe trajectory out of the solar system.",
+      "choices": [],
+      "grants": ["laser_ablation_success"]
+    },
+    {
+      "id": "ending_laser_ablation_failure",
+      "title": "Laser Ablation Failure",
+      "body_md": "**CATASTROPHIC FAILURE**: The laser ablation plan has failed catastrophically. 3I/ATLAS has shattered into multiple fragments, and several are now on a collision course with Earth. You have traded one crisis for another, far worse one.",
+      "choices": [],
+      "grants": ["laser_ablation_failure"]
+    },
+    {
+      "id": "ending_kinetic_impactor_success",
+      "title": "Kinetic Impactor Success",
+      "body_md": "**MISSION ACCOMPLISHED**: The kinetic impactor successfully diverted 3I/ATLAS from its collision course with Mars. The object is now on a safe trajectory.",
+      "choices": [],
+      "grants": ["kinetic_impactor_success"]
+    },
+    {
+      "id": "ending_kinetic_impactor_failure",
+      "title": "Kinetic Impactor Failure",
+      "body_md": "**MISSION FAILURE**: The kinetic impactor failed to significantly alter the object's course. The impact with Mars is now imminent.",
+      "choices": [],
+      "grants": ["kinetic_impactor_failure"]
+    },
+    {
+      "id": "ending_gravity_tractor_success",
+      "title": "Gravity Tractor Success",
+      "body_md": "**MISSION ACCOMPLISHED**: The gravity tractor successfully diverted 3I/ATLAS over a period of several months. The threat to Mars has been neutralized.",
+      "choices": [],
+      "grants": ["gravity_tractor_success"]
+    }
+  ]
+}

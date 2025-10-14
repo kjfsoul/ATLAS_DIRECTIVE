@@ -104,19 +104,36 @@
       "body_md": "**CORRECT ANALYSIS**: Hyperbolic trajectory confirmed.\n\n**SCIENTIFIC VALIDATION**: The eccentricity > 1.0 and velocity of ~137,000 mph relative to the Sun definitively establishes 3I/ATLAS as an interstellar visitor, not bound to our solar system.\n\n**IMPLICATIONS**: This trajectory suggests the object originated from beyond our solar system, likely from the Milky Way's thick disk population.",
       "choices": [
         {
-          "id": "proceed_comparison",
-          "label": "Compare with previous interstellar visitors",
-          "next_id": "interstellar_comparison"
-        },
-        {
-          "id": "proceed_age_analysis",
-          "label": "Analyze object age and composition",
-          "next_id": "age_composition_analysis"
+          "id": "proceed_to_specialization",
+          "label": "Proceed to specialization branches",
+          "next_id": "specialization_hub"
         }
       ],
       "rewards": {
         "tokens": 1
       }
+    },
+    {
+      "id": "specialization_hub",
+      "title": "Specialization Branch Hub",
+      "body_md": "Your initial analysis is complete. Choose a specialization to continue your investigation.",
+      "choices": [
+        {
+          "id": "goto_borisov_analysis",
+          "label": "Begin advanced chemical analysis (Borisov Comparison)",
+          "next_id": "borisov_chemical_entry"
+        },
+        {
+          "id": "goto_velocity_analysis",
+          "label": "Deep dive into velocity and age determination",
+          "next_id": "velocity_age_entry"
+        },
+        {
+          "id": "goto_impact_scenario",
+          "label": "Model potential impact scenarios",
+          "next_id": "impact_scenario_entry"
+        }
+      ]
     },
     {
       "id": "trajectory_error_retry",

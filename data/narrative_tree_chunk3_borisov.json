@@ -13,7 +13,7 @@
   "root_id": "borisov_chemical_entry",
   "tokens": {
     "chrono": {
-      "start": 2,
+      "start": 3,
       "earn_rules": [
         {
           "action": "complete_chemical_analysis",
@@ -77,6 +77,18 @@
           "id": "analyze_organics",
           "label": "Examine organic molecular complexity",
           "next_id": "organic_complexity"
+        }
+      ]
+    },
+    {
+      "id": "isotopic_analysis",
+      "title": "Isotopic Ratio Analysis",
+      "body_md": "**ISOTOPIC ANALYSIS**: Analysis of isotopic ratios in 2I/Borisov's composition can reveal details about its origin.",
+      "choices": [
+        {
+          "id": "compare_to_solar",
+          "label": "Compare isotopic ratios to solar system objects",
+          "next_id": "atlas_comparison"
         }
       ]
     },
@@ -211,7 +223,7 @@
       ]
     },
     {
-      "id": "ending_formation_success",
+      "id": "ending_borisov_formation_success",
       "title": "Formation Environment Reconstruction Complete",
       "body_md": "**MISSION ACCOMPLISHED**: Borisov formation environment successfully modeled.\n\n**KEY FINDINGS**:\n- Formation era: >4.6 billion years ago (pre-solar system)\n- Formation location: Milky Way thick disk\n- Chemical environment: Carbon-monoxide enriched\n- Parent body: Likely planetesimal from ancient star system\n\n**ACHIEVEMENT UNLOCKED**: Formation Modeling Expert\n\n**NEXT STEPS**: Model refinement with additional isotopic data from future observations.",
       "choices": [],

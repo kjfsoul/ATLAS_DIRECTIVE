@@ -304,7 +304,7 @@
       ]
     },
     {
-      "id": "ending_velocity_success",
+      "id": "ending_velocity_analysis_success",
       "title": "Kinematic Analysis Mastery Complete",
       "body_md": "**MISSION ACCOMPLISHED**: Comprehensive kinematic analysis of 3I/ATLAS completed.\n\n**KEY FINDINGS**:\n- **Velocity Confirmed**: ~137,000 mph relative to Sun\n- **Trajectory Verified**: Hyperbolic orbit with eccentricity > 1.0\n- **Origin Established**: Interstellar space, Milky Way thick disk\n- **Dynamical Model**: Complete orbital mechanics solution\n\n**ACHIEVEMENT UNLOCKED**: Kinematic Analysis Master\n\n**NEXT STEPS**: Velocity data informs future interstellar object detection and tracking algorithms.",
       "choices": [],

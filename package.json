@@ -51,6 +51,7 @@
     "ui"
   ],
   "dependencies": {
+    "@genkit-ai/mcp": "^1.21.0",
     "@types/three": "^0.168.0",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
